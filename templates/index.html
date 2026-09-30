@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Integrity Monitoring & Tamper Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0E14;
+            --bg-card: #151922;
+            --bg-card-hover: #1A202C;
+            --border: #232936;
+            --text-main: #E2E8F0;
+            --text-muted: #8E9CAE;
+            --cyan: #00F0FF;
+            --emerald: #00E676;
+            --amber: #FFB300;
+            --crimson: #FF5252;
+            --blue: #3B82F6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+        /* Sidebar */
+        aside {
+            width: 250px;
+            background-color: #080A0F;
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: fixed;
+            height: 100vh;
+        }
+        .brand {
+            padding: 0 12px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+        .brand-badge {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .brand-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #FFF;
+            margin-top: 4px;
+        }
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-btn:hover { background-color: var(--bg-card); color: #FFF; }
+        .nav-btn.active {
+            background-color: rgba(0, 240, 255, 0.1);
+            color: var(--cyan);
+            border-color: rgba(0, 240, 255, 0.2);
+        }
+        /* Main Content */
+        main {
+            margin-left: 250px;
+            flex: 1;
+            padding: 30px 40px;
+            max-width: 1400px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 22px; font-weight: 700; color: #FFF; }
+        p.subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .header-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: #1F6FEB; color: #FFF; }
+        .btn-primary:hover { background: #388BFD; }
+        .btn-success { background: #238636; color: #FFF; }
+        .btn-success:hover { background: #2EA043; }
+        .btn-danger { background: #DA3633; color: #FFF; }
+        .btn-danger:hover { background: #F85149; }
+        .btn-outline { background: var(--bg-card); border-color: var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--bg-card-hover); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 20px;
+        }
+        .stat-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
+        .stat-value { font-size: 30px; font-weight: 700; margin: 6px 0 2px; }
+        .stat-sub { font-size: 11px; color: var(--text-muted); }
+
+        /* Card Section */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+        .card-title { font-size: 15px; font-weight: 700; color: #FFF; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 10px 14px; background: rgba(0,0,0,0.2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 14px; border-bottom: 1px solid rgba(35, 41, 54, 0.6); }
+        tr:hover { background: rgba(255,255,255,0.02); }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-clean { background: rgba(0, 230, 118, 0.15); color: var(--emerald); border: 1px solid rgba(0, 230, 118, 0.3); }
+        .badge-modified { background: rgba(255, 82, 82, 0.15); color: var(--crimson); border: 1px solid rgba(255, 82, 82, 0.3); }
+        .badge-high { background: rgba(255, 82, 82, 0.15); color: var(--crimson); font-weight: bold; }
+        .badge-medium { background: rgba(255, 179, 0, 0.15); color: var(--amber); }
+        .badge-low { background: rgba(0, 230, 118, 0.15); color: var(--emerald); }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #79C0FF; }
+
+        /* Diff Viewer */
+        .diff-box {
+            background: #07090E;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            max-height: 380px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .diff-add { color: #7EE787; background: rgba(46, 160, 67, 0.15); display: block; }
+        .diff-del { color: #FF7B72; background: rgba(248, 81, 73, 0.15); display: block; }
+        .diff-ctx { color: var(--text-muted); display: block; }
+
+        /* Input Form */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        input[type="text"] {
+            flex: 1;
+            background: #0B0E14;
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 6px;
+            color: #FFF;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--cyan); }
+    </style>
+</head>
+<body>
+    <aside>
+        <div class="brand">
+            <div class="brand-badge">FIM SENTINEL</div>
+            <div class="brand-title">File Integrity Monitor</div>
+        </div>
+        <button class="nav-btn active" onclick="showTab('dashboard')">⚡ Dashboard</button>
+        <button class="nav-btn" onclick="showTab('scanner')">🔍 Protect Asset</button>
+        <button class="nav-btn" onclick="showTab('assets')">🛡️ Monitored Assets</button>
+        <button class="nav-btn" onclick="showTab('diff')">📊 Change Analysis</button>
+        <button class="nav-btn" onclick="showTab('reports')">📑 Forensic Reports</button>
+    </aside>
+
+    <main>
+        <header>
+            <div>
+                <h1 id="page-title">SECURITY OPERATIONS DASHBOARD</h1>
+                <p class="subtitle" id="page-sub">Dual-Primitive Cryptographic Baseline & Real-Time Tamper Triage</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="btn-toggle-monitor" onclick="toggleMonitor()">▶ Start Real-Time Monitor</button>
+                <button class="btn btn-outline" onclick="verifyAll()">⚡ Run Integrity Scan</button>
+            </div>
+        </header>
+
+        <!-- STATS ROW -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Monitored Assets</div>
+                <div class="stat-value" id="stat-total" style="color: var(--cyan);">0</div>
+                <div class="stat-sub">Protected in SQLite</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Clean Assets</div>
+                <div class="stat-value" id="stat-clean" style="color: var(--emerald);">0</div>
+                <div class="stat-sub">Hashes intact</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Tampering Alerts</div>
+                <div class="stat-value" id="stat-alerts" style="color: var(--crimson);">0</div>
+                <div class="stat-sub">Violations detected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Watchdog Engine</div>
+                <div class="stat-value" id="stat-watchdog" style="color: var(--text-muted); font-size: 22px;">IDLE</div>
+                <div class="stat-sub">750ms lock debouncer</div>
+            </div>
+        </div>
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-pane">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Live Forensic Activity Feed</div>
+                    <span style="font-size: 11px; color: var(--emerald);">● Live Auto-refresh (3s)</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Target Asset</th>
+                            <th>Event</th>
+                            <th>Risk Level</th>
+                            <th>Delta Highlights</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-tbody">
+                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading events...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: SCANNER (Add new file) -->
+        <div id="tab-scanner" class="tab-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Add Asset to Cryptographic Baseline</div>
+                </div>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+                    Enter the absolute path of any file on your computer to calculate dual SHA-256 / SHA-3-256 hashes and save a trusted baseline snapshot in the vault.
+                </p>
+                <div class="input-group">
+                    <input type="text" id="scan-path-input" placeholder="e.g. C:/Users/DELL/OneDrive/Documents/PROJECT MDC ALPHA/test_sample.txt">
+                    <button class="btn btn-outline" onclick="previewScan()">Preview Dual Hash</button>
+                    <button class="btn btn-success" onclick="baselineFile()">🛡️ Establish Baseline & Vault</button>
+                </div>
+                <div id="scan-preview-box" style="display: none; margin-top: 16px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 6px; font-size: 12px;"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ASSETS -->
+        <div id="tab-assets" class="tab-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Monitored Assets Inventory</div>
+                    <button class="btn btn-outline" onclick="loadFiles()">Refresh</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Full Path</th>
+                            <th>Status</th>
+                            <th>Size</th>
+                            <th>Baseline SHA-256</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="files-tbody">
+                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading assets...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 4: DIFF & ANALYSIS -->
+        <div id="tab-diff" class="tab-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title" id="diff-target-title">Forensic Diff Inspection</div>
+                    <button class="btn btn-primary" id="btn-ai-triage" onclick="runAiTriage()">✨ Generate AI Threat Advisory</button>
+                </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                    <div>
+                        <div style="font-size: 11px; font-weight: 700; color: var(--cyan); margin-bottom: 8px;">UNIFIED LINE DIFF (BASELINE VS CURRENT)</div>
+                        <div class="diff-box" id="diff-content-box">Select an asset or incident to view granular line differences.</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 8px;">HEURISTIC RISK ASSESSMENT</div>
+                        <div id="heuristic-results-box" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 14px; border-radius: 6px; font-size: 12px; margin-bottom: 14px;">
+                            No file loaded.
+                        </div>
+                        <div style="font-size: 11px; font-weight: 700; color: var(--cyan); margin-bottom: 8px;">AI THREAT REMEDIATION ADVICE</div>
+                        <div id="ai-results-box" style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); padding: 14px; border-radius: 6px; font-size: 12px;">
+                            Click 'Generate AI Threat Advisory' to redact credentials and triage with AI.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: REPORTS -->
+        <div id="tab-reports" class="tab-pane" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Generated Forensic Compliance Reports</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Report Name</th>
+                            <th>Format</th>
+                            <th>Size</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-tbody">
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading reports...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentFileId = null;
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            event.target.classList.add('active');
+
+            if(tabName === 'dashboard') loadEvents();
+            if(tabName === 'assets') loadFiles();
+            if(tabName === 'reports') loadReports();
+        }
+
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                document.getElementById('stat-total').textContent = data.total_files;
+                document.getElementById('stat-clean').textContent = data.clean_files;
+                document.getElementById('stat-alerts').textContent = data.modified_files + data.missing_files;
+
+                const wd = document.getElementById('stat-watchdog');
+                const btn = document.getElementById('btn-toggle-monitor');
+                if (data.monitor_running) {
+                    wd.textContent = 'ACTIVE';
+                    wd.style.color = 'var(--emerald)';
+                    btn.textContent = '⏹ Stop Real-Time Monitor';
+                    btn.className = 'btn btn-danger';
+                } else {
+                    wd.textContent = 'IDLE';
+                    wd.style.color = 'var(--text-muted)';
+                    btn.textContent = '▶ Start Real-Time Monitor';
+                    btn.className = 'btn btn-primary';
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadEvents() {
+            try {
+                const res = await fetch('/api/events');
+                const data = await res.json();
+                const tbody = document.getElementById('events-tbody');
+                if(!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No tampering events recorded yet.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(ev => `
+                    <tr>
+                        <td class="mono">${ev.timestamp.substring(0, 19)}</td>
+                        <td><strong>${ev.file_path.split(/[\\\\/]/).pop()}</strong><br><span class="mono" style="font-size: 10px; color: var(--text-muted);">${ev.file_path}</span></td>
+                        <td><span class="badge badge-modified">${ev.event_type}</span></td>
+                        <td><span class="badge badge-${ev.risk_level.toLowerCase()}">${ev.risk_level} (${ev.risk_score}/100)</span></td>
+                        <td>${ev.diff_summary || '-'}</td>
+                        <td>
+                            ${ev.file_id ? `<button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="inspectDiff(${ev.file_id})">Inspect Diff</button>` : ''}
+                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="generateReport(${ev.id})">Export Report</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadFiles() {
+            try {
+                const res = await fetch('/api/files');
+                const data = await res.json();
+                const tbody = document.getElementById('files-tbody');
+                if(!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No assets registered. Add files in "Protect Asset" tab.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(f => `
+                    <tr>
+                        <td><strong>${f.file_name}</strong></td>
+                        <td class="mono" style="font-size: 11px;">${f.file_path}</td>
+                        <td><span class="badge ${f.status === 'CLEAN' ? 'badge-clean' : 'badge-modified'}">${f.status}</span></td>
+                        <td>${(f.file_size || 0).toLocaleString()} B</td>
+                        <td class="mono">${f.sha256.substring(0, 16)}...</td>
+                        <td>
+                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="verifyFile(${f.id})">Verify</button>
+                            <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;" onclick="inspectDiff(${f.id})">Diff</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function toggleMonitor() {
+            await fetch('/api/toggle_monitor', { method: 'POST' });
+            fetchStats();
+        }
+
+        async function verifyAll() {
+            await fetch('/api/verify_all', { method: 'POST' });
+            fetchStats();
+            loadEvents();
+            alert('Integrity scan completed across all registered assets.');
+        }
+
+        async function verifyFile(fileId) {
+            const res = await fetch('/api/verify/' + fileId, { method: 'POST' });
+            const data = await res.json();
+            alert(`${data.status}: ${data.message}`);
+            fetchStats();
+            loadFiles();
+        }
+
+        async function previewScan() {
+            const path = document.getElementById('scan-path-input').value.trim();
+            if(!path) return alert('Please enter a valid file path.');
+            const res = await fetch('/api/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path })
+            });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+
+            const box = document.getElementById('scan-preview-box');
+            box.style.display = 'block';
+            box.innerHTML = `
+                <div><strong>File:</strong> ${data.file_name} (${data.file_size.toLocaleString()} bytes)</div>
+                <div class="mono" style="margin-top: 4px;"><strong>SHA-256:</strong> ${data.sha256}</div>
+                <div class="mono" style="margin-top: 2px;"><strong>SHA-3-256:</strong> ${data.sha3_256}</div>
+            `;
+        }
+
+        async function baselineFile() {
+            const path = document.getElementById('scan-path-input').value.trim();
+            if(!path) return alert('Please enter a valid file path.');
+            const res = await fetch('/api/baseline', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path })
+            });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            alert('Successfully established baseline and stored copy in .fim_vault/!');
+            document.getElementById('scan-path-input').value = '';
+            document.getElementById('scan-preview-box').style.display = 'none';
+            fetchStats();
+        }
+
+        async function inspectDiff(fileId) {
+            currentFileId = fileId;
+            showTab('diff');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.textContent.includes('Change Analysis')) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
+            document.getElementById('diff-content-box').textContent = 'Computing granular diff against vault baseline...';
+            const res = await fetch('/api/diff/' + fileId);
+            const data = await res.json();
+
+            document.getElementById('diff-target-title').textContent = 'Tamper Analysis: ' + data.file_name;
+
+            // Render Diff
+            const diffBox = document.getElementById('diff-content-box');
+            if(data.is_identical) {
+                diffBox.innerHTML = '<span class="diff-ctx">File contents match baseline snapshot byte-for-byte. Integrity verified.</span>';
+            } else if(data.raw_diff) {
+                diffBox.innerHTML = data.raw_diff.split('\n').map(l => {
+                    const safe = l.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    if(l.startsWith('+')) return `<span class="diff-add">${safe}</span>`;
+                    if(l.startsWith('-')) return `<span class="diff-del">${safe}</span>`;
+                    return `<span class="diff-ctx">${safe}</span>`;
+                }).join('');
+            } else {
+                diffBox.innerHTML = `<span class="diff-ctx">${data.message || 'No diff available.'}</span>`;
+            }
+
+            // Render Heuristics
+            const hBox = document.getElementById('heuristic-results-box');
+            let hHtml = `<div><strong>Risk Level:</strong> <span class="badge badge-${data.risk_level.toLowerCase()}">${data.risk_level} (Score: ${data.risk_score}/100)</span></div>`;
+            if(data.triggered_rules && data.triggered_rules.length > 0) {
+                hHtml += '<div style="margin-top: 10px;"><strong>Triggered Security Rules:</strong></div>';
+                hHtml += data.triggered_rules.map(r => `
+                    <div style="margin-top: 6px; border-left: 2px solid var(--crimson); padding-left: 8px;">
+                        <span style="color: var(--crimson); font-weight: 700;">${r.rule_name}</span> ${r.line_number ? `(Line ${r.line_number})` : ''}
+                        <div style="color: var(--text-muted); font-size: 11px;">${r.description}</div>
+                    </div>
+                `).join('');
+            } else {
+                hHtml += '<div style="color: var(--text-muted); margin-top: 8px;">No security heuristic indicators detected.</div>';
+            }
+            hBox.innerHTML = hHtml;
+        }
+
+        async function runAiTriage() {
+            if(!currentFileId) return alert('Select an asset to triage first.');
+            const btn = document.getElementById('btn-ai-triage');
+            const aiBox = document.getElementById('ai-results-box');
+            btn.disabled = true;
+            btn.textContent = '⏳ Sanitizing Secrets & Triaging...';
+            aiBox.innerHTML = 'Redacting credentials and generating AI incident response...';
+
+            try {
+                const res = await fetch('/api/ai_triage/' + currentFileId, { method: 'POST' });
+                const data = await res.json();
+                btn.disabled = false;
+                btn.textContent = '✨ Generate AI Threat Advisory';
+
+                aiBox.innerHTML = `
+                    <div style="font-weight: 700; color: var(--cyan); margin-bottom: 6px;">Executive Summary:</div>
+                    <div style="margin-bottom: 10px;">${data.executive_summary}</div>
+                    <div style="font-weight: 700; color: var(--amber); margin-bottom: 6px;">Immediate Remediation Actions:</div>
+                    <ol style="margin-left: 18px;">
+                        ${(data.recommended_actions || []).map(a => `<li>${a}</li>`).join('')}
+                    </ol>
+                    <div style="font-size: 10px; color: var(--text-muted); margin-top: 10px;">Mode: ${data.is_offline ? 'Offline Deterministic Rule Engine' : 'Live Cloud AI'}</div>
+                `;
+            } catch(e) {
+                btn.disabled = false;
+                btn.textContent = '✨ Generate AI Threat Advisory';
+                alert('Error running AI triage: ' + e);
+            }
+        }
+
+        async function loadReports() {
+            try {
+                const res = await fetch('/api/reports');
+                const data = await res.json();
+                const tbody = document.getElementById('reports-tbody');
+                if(!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No reports generated yet. Export one from Dashboard or Events.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(r => `
+                    <tr>
+                        <td><strong>${r.file_name}</strong></td>
+                        <td><span class="badge" style="background: rgba(255,255,255,0.1);">${r.format}</span></td>
+                        <td>${r.size}</td>
+                        <td><a href="/reports/${r.file_name}" target="_blank" class="btn btn-outline" style="padding: 4px 10px; font-size: 11px;">🌐 Open in Browser</a></td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function generateReport(eventId) {
+            const res = await fetch('/api/generate_report/' + eventId, { method: 'POST' });
+            const data = await res.json();
+            alert('Forensic audit report generated!');
+            window.open('/reports/' + data.filename, '_blank');
+        }
+
+        // Initialize and live auto-poll every 3 seconds
+        fetchStats();
+        loadEvents();
+        setInterval(() => {
+            fetchStats();
+            if(document.getElementById('tab-dashboard').style.display !== 'none') {
+                loadEvents();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
