@@ -7,13 +7,58 @@ from pathlib import Path
 
 # Base Paths
 BASE_DIR = Path(__file__).resolve().parent
-VAULT_DIR = BASE_DIR / ".fim_vault"
-DB_PATH = BASE_DIR / "fim_database.sqlite3"
-REPORTS_DIR = BASE_DIR / "generated_reports"
 
-# Ensure essential directories exist
-VAULT_DIR.mkdir(parents=True, exist_ok=True)
-REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+# Serverless / Read-Only Environment Handling (e.g., Vercel, AWS Lambda)
+IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+if IS_SERVERLESS:
+    TEMP_DIR = Path("/tmp")
+    VAULT_DIR = TEMP_DIR / ".fim_vault"
+    DB_PATH = TEMP_DIR / "fim_database.sqlite3"
+    REPORTS_DIR = TEMP_DIR / "generated_reports"
+
+    # Safely create writable temp directories
+    try:
+        VAULT_DIR.mkdir(parents=True, exist_ok=True)
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+
+    # Copy pre-seeded database to writable /tmp on cold start if needed
+    src_db = BASE_DIR / "fim_database.sqlite3"
+    if src_db.exists() and not DB_PATH.exists():
+        import shutil
+        try:
+            shutil.copy2(src_db, DB_PATH)
+        except Exception:
+            pass
+
+    # Copy pre-existing baseline snapshots to /tmp/.fim_vault
+    src_vault = BASE_DIR / ".fim_vault"
+    if src_vault.exists():
+        import shutil
+        try:
+            for snap in src_vault.iterdir():
+                if snap.is_file() and not (VAULT_DIR / snap.name).exists():
+                    shutil.copy2(snap, VAULT_DIR / snap.name)
+        except Exception:
+            pass
+else:
+    VAULT_DIR = BASE_DIR / ".fim_vault"
+    DB_PATH = BASE_DIR / "fim_database.sqlite3"
+    REPORTS_DIR = BASE_DIR / "generated_reports"
+
+    # Ensure essential directories exist safely
+    try:
+        VAULT_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+
+    try:
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+
 
 # Performance and Limits
 CHUNK_SIZE = 65536                  # 64 KB single-pass read chunk

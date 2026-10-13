@@ -122,6 +122,12 @@ def api_verify_single(file_id):
 
 @app.route("/api/toggle_monitor", methods=["POST"])
 def api_toggle_monitor():
+    if getattr(config, "IS_SERVERLESS", False):
+        return jsonify({
+            "running": False,
+            "serverless": True,
+            "message": "Real-time filesystem observer operates locally; cloud deployment provides dashboard & audit analysis."
+        })
     if monitor.is_running:
         monitor.stop()
     else:
