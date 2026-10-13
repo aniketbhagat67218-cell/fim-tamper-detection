@@ -6,7 +6,7 @@ import os
 import shutil
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any, Union
 import config
 from database.db_manager import get_db
 
@@ -21,7 +21,7 @@ class SnapshotVault:
         self.db = db or get_db()
 
 
-    def store_snapshot(self, file_path: str | Path, file_id: int,
+    def store_snapshot(self, file_path: Union[str, Path], file_id: int,
                        sha256: str, file_size: int, is_binary: bool = False) -> Optional[str]:
         """
         Stores an exact baseline copy of the file in the .fim_vault directory.

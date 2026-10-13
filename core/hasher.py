@@ -7,7 +7,7 @@ import time
 import hashlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 import config
 
 @dataclass
@@ -31,7 +31,7 @@ def is_binary_buffer(buffer: bytes) -> bool:
     non_text = buffer.translate(None, text_chars)
     return len(non_text) / len(buffer) > 0.30
 
-def compute_dual_hash(file_path: str | Path, retries: int = config.FILE_LOCK_RETRIES,
+def compute_dual_hash(file_path: Union[str, Path], retries: int = config.FILE_LOCK_RETRIES,
                       retry_delay: float = config.FILE_LOCK_RETRY_DELAY) -> DualHashResult:
     """
     Computes both SHA-256 and SHA-3-256 in a SINGLE I/O pass by streaming 64 KB chunks.

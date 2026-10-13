@@ -4,7 +4,7 @@ Granular file comparison engine for text unified diffing and binary delta inspec
 import difflib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any, Union
 from core.hasher import is_binary_buffer
 from core.vault import get_vault
 
@@ -86,7 +86,7 @@ def generate_line_diff(baseline_lines: List[str], current_lines: List[str]) -> T
 
     return diff_lines, added_count, deleted_count
 
-def compare_file_with_baseline(file_id: int, current_path: str | Path,
+def compare_file_with_baseline(file_id: int, current_path: Union[str, Path],
                                old_sha256: str = "", new_sha256: str = "",
                                old_size: int = 0,
                                vault: Optional[Any] = None) -> ComparisonResult:
