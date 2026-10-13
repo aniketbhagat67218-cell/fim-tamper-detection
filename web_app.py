@@ -1,6 +1,10 @@
 """
 Web-Based Dashboard for the File Integrity Monitoring and Tampering Detection System.
 Provides a browser interface at http://127.0.0.1:5000 powered by Flask and our existing FIM core.
+
+Serverless-safe: gracefully disables real-time watchdog monitoring on cloud deployments
+(Vercel, AWS Lambda) while keeping all dashboard, scan, diff, risk, AI triage, and
+report features fully functional.
 """
 import os
 import sys
@@ -11,7 +15,10 @@ from threading import Timer
 from pathlib import Path
 from flask import Flask, render_template, jsonify, request, send_from_directory
 
-# Ensure project root is in sys.path
+# ---------------------------------------------------------------------------
+# Path setup — ensure project root is importable whether run directly or via
+# the api/index.py Vercel entrypoint.
+# ---------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
@@ -23,37 +30,68 @@ from core.hasher import compute_dual_hash
 from core.comparator import compare_file_with_baseline
 from core.risk_analyzer import analyze_diff_risk
 from core.ai_advisor import get_ai_advisor
-from core.monitor import FileIntegrityMonitor
 from reports.report_generator import generate_audit_report
 
+# ---------------------------------------------------------------------------
+# Optional: real-time watchdog monitor (disabled on serverless)
+# ---------------------------------------------------------------------------
+_SERVERLESS = getattr(config, "IS_SERVERLESS", False)
+
+FileIntegrityMonitor = None  # type: ignore
+monitor = None
+
+if not _SERVERLESS:
+    try:
+        from core.monitor import FileIntegrityMonitor  # type: ignore
+    except ImportError:
+        FileIntegrityMonitor = None  # watchdog not installed or unavailable
+
+# ---------------------------------------------------------------------------
+# Application-level singletons
+# ---------------------------------------------------------------------------
 app = Flask(__name__, template_folder=str(BASE_DIR / "templates"))
 db = get_db()
 vault = get_vault()
 ai_advisor = get_ai_advisor()
-event_queue = queue.Queue()
-monitor = FileIntegrityMonitor(event_queue=event_queue)
+event_queue: queue.Queue = queue.Queue()
 
-# --- Routes ---
+if FileIntegrityMonitor is not None:
+    monitor = FileIntegrityMonitor(event_queue=event_queue)
+
+# ---------------------------------------------------------------------------
+# Helper
+# ---------------------------------------------------------------------------
+def _monitor_running() -> bool:
+    return bool(monitor and getattr(monitor, "is_running", False))
+
+# ---------------------------------------------------------------------------
+# Routes
+# ---------------------------------------------------------------------------
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+
 @app.route("/api/stats")
 def api_stats():
     stats = db.get_system_stats()
-    stats["monitor_running"] = monitor.is_running
+    stats["monitor_running"] = _monitor_running()
+    stats["serverless"] = _SERVERLESS
     return jsonify(stats)
+
 
 @app.route("/api/events")
 def api_events():
     events = db.get_event_history(limit=50)
     return jsonify(events)
 
+
 @app.route("/api/files")
 def api_files():
     files = db.get_all_monitored_files()
     return jsonify(files)
+
 
 @app.route("/api/scan", methods=["POST"])
 def api_scan():
@@ -74,6 +112,7 @@ def api_scan():
         "sha256": h.sha256,
         "sha3_256": h.sha3_256
     })
+
 
 @app.route("/api/baseline", methods=["POST"])
 def api_baseline():
@@ -105,34 +144,51 @@ def api_baseline():
         is_binary=h.is_binary
     )
 
-    monitor.reload_monitored_files()
+    if monitor is not None:
+        monitor.reload_monitored_files()
+
     return jsonify({"success": True, "file_id": file_id})
+
 
 @app.route("/api/verify_all", methods=["POST"])
 def api_verify_all():
     files = db.get_all_monitored_files()
+    if monitor is None:
+        return jsonify({
+            "success": False,
+            "serverless": True,
+            "message": "Manual verify runs locally; real-time monitoring not available on cloud."
+        })
     for f in files:
         monitor.manual_verify_file(f["id"])
     return jsonify({"success": True, "count": len(files)})
 
+
 @app.route("/api/verify/<int:file_id>", methods=["POST"])
 def api_verify_single(file_id):
+    if monitor is None:
+        return jsonify({
+            "status": "SERVERLESS",
+            "message": "Real-time monitoring not available on cloud deployment."
+        })
     res = monitor.manual_verify_file(file_id)
     return jsonify(res)
 
+
 @app.route("/api/toggle_monitor", methods=["POST"])
 def api_toggle_monitor():
-    if getattr(config, "IS_SERVERLESS", False):
+    if _SERVERLESS or monitor is None:
         return jsonify({
             "running": False,
             "serverless": True,
-            "message": "Real-time filesystem observer operates locally; cloud deployment provides dashboard & audit analysis."
+            "message": "Real-time filesystem monitor runs locally only. Cloud deployment provides full dashboard, AI triage and audit analysis."
         })
     if monitor.is_running:
         monitor.stop()
     else:
         monitor.start()
     return jsonify({"running": monitor.is_running})
+
 
 @app.route("/api/diff/<int:file_id>")
 def api_diff(file_id):
@@ -174,6 +230,7 @@ def api_diff(file_id):
         ]
     })
 
+
 @app.route("/api/ai_triage/<int:file_id>", methods=["POST"])
 def api_ai_triage(file_id):
     rec = db.get_monitored_file_by_id(file_id)
@@ -192,7 +249,12 @@ def api_ai_triage(file_id):
     risk = analyze_diff_risk(comp, file_path=rec["file_path"])
 
     heuristics_data = [
-        {"rule_name": r.rule_name, "category": r.category, "line_number": r.line_number, "description": r.description}
+        {
+            "rule_name": r.rule_name,
+            "category": r.category,
+            "line_number": r.line_number,
+            "description": r.description
+        }
         for r in risk.triggered_rules
     ]
 
@@ -210,6 +272,7 @@ def api_ai_triage(file_id):
         "is_offline": triage.is_offline_fallback
     })
 
+
 @app.route("/api/reports")
 def api_reports():
     reports = []
@@ -224,22 +287,28 @@ def api_reports():
                 })
     return jsonify(reports)
 
+
 @app.route("/api/generate_report/<int:event_id>", methods=["POST"])
 def api_generate_report(event_id):
     out = generate_audit_report(event_id, format="html")
     return jsonify({"success": True, "filename": out.name})
 
+
 @app.route("/reports/<path:filename>")
 def serve_report(filename):
     return send_from_directory(config.REPORTS_DIR, filename)
 
-def open_browser():
+
+# ---------------------------------------------------------------------------
+# Local development entry point (not used on Vercel)
+# ---------------------------------------------------------------------------
+def _open_browser():
     webbrowser.open("http://127.0.0.1:5000")
 
-if __name__ == "__main__":
-    print("\n" + "="*60)
-    print("[*] FIM Sentinel Web Dashboard starting at: http://127.0.0.1:5000")
-    print("="*60 + "\n")
-    Timer(1.2, open_browser).start()
-    app.run(host="127.0.0.1", port=5000, debug=False)
 
+if __name__ == "__main__":
+    print("\n" + "=" * 60)
+    print("[*] FIM Sentinel Web Dashboard starting at: http://127.0.0.1:5000")
+    print("=" * 60 + "\n")
+    Timer(1.2, _open_browser).start()
+    app.run(host="127.0.0.1", port=5000, debug=False)
