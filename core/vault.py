@@ -100,5 +100,51 @@ class SnapshotVault:
                 except OSError:
                     pass
 
+    def store_snapshot_bytes(self, file_bytes: bytes, file_id: int,
+                             sha256: str, file_size: int,
+                             is_binary: bool = False,
+                             filename: str = "upload.bin") -> Optional[str]:
+        """
+        Store raw bytes as a vault snapshot (for browser-uploaded files).
+        Works on Vercel where /tmp is writable.
+        """
+        vault_filename = f"{file_id}_{sha256[:16]}.snap"
+        vault_target = self.vault_dir / vault_filename
+        try:
+            if file_size <= self.max_size_bytes:
+                with open(vault_target, "wb") as f:
+                    f.write(file_bytes)
+                self.db.add_baseline_snapshot(
+                    file_id=file_id,
+                    vault_path=str(vault_target),
+                    snapshot_hash=sha256,
+                    snapshot_size=file_size
+                )
+                return str(vault_target)
+            else:
+                self.db.add_baseline_snapshot(
+                    file_id=file_id,
+                    vault_path="[SIZE_LIMIT_EXCEEDED]",
+                    snapshot_hash=sha256,
+                    snapshot_size=file_size
+                )
+                return None
+        except Exception as e:
+            logger.error(f"Failed to store snapshot bytes for file {file_id}: {e}")
+            return None
+
+    def read_snapshot_bytes(self, file_id: int) -> Optional[bytes]:
+        """Read baseline snapshot as raw bytes (for upload-based diffing)."""
+        snap_path = self.get_snapshot_path(file_id)
+        if not snap_path:
+            return None
+        try:
+            with open(snap_path, "rb") as f:
+                return f.read()
+        except Exception as e:
+            logger.error(f"Error reading snapshot bytes for file {file_id}: {e}")
+            return None
+
+
 def get_vault() -> SnapshotVault:
     return SnapshotVault()

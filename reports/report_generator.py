@@ -449,3 +449,103 @@ def generate_audit_report(event_id: int, format: str = "html") -> Path:
     if format.lower() == "markdown" or format.lower() == "md":
         return gen.generate_markdown_report(event_id)
     return gen.generate_html_report(event_id)
+
+
+def generate_report_html_string(event_id: int) -> str:
+    """
+    Generate a forensic report and return its HTML content as a string.
+    Used by /api/view_report/<id> for serverless deployment where filesystem
+    writes are ephemeral or unavailable.
+
+    Raises ValueError if event not found.
+    """
+    gen = ReportGenerator()
+    event = gen.db.get_event_by_id(event_id)
+    if not event:
+        raise ValueError(f"Event ID {event_id} not found in database.")
+
+    p = Path(event["file_path"])
+    file_name = p.name
+
+    # Parse AI summary
+    ai_summary_text = "No AI analysis performed for this incident."
+    remediation_items = ["Audit the file changes manually and revert to baseline if unauthorized."]
+    if event["ai_summary"]:
+        try:
+            ai_parsed = json.loads(event["ai_summary"])
+            ai_summary_text = ai_parsed.get("executive_summary", event["ai_summary"])
+            remediation_items = ai_parsed.get("recommended_actions", remediation_items)
+        except Exception:
+            ai_summary_text = str(event["ai_summary"])
+
+    remediation_html = "".join([f"<li>{item}</li>" for item in remediation_items])
+
+    # Heuristics
+    heuristics_html = ""
+    if event["detected_heuristics"]:
+        for h in event["detected_heuristics"]:
+            cat_class = "high" if h.get("category") == "HIGH" else "med"
+            line_info = f" (Line {h.get('line_number')})" if h.get("line_number") else ""
+            heuristics_html += f"""
+            <div class="heuristic-item {cat_class}">
+                <div class="heuristic-title">{h.get('rule_name', 'Rule')} &bull; [{h.get('category')}] {line_info}</div>
+                <div class="heuristic-desc">{h.get('description', '')}</div>
+                <div style="font-family: monospace; font-size: 11px; color: #7EE787;">Matched: {h.get('line_content', '')}</div>
+            </div>
+            """
+    else:
+        heuristics_html = "<p style='font-size: 13px; color: #8B949E;'>No high or medium security patterns matched.</p>"
+
+    # Diff
+    diff_summary = event["diff_summary"] or ""
+    diff_html = ""
+    if event["file_id"]:
+        try:
+            from core.comparator import compare_file_with_baseline
+            from core.vault import get_vault as _get_vault
+            _vault = _get_vault()
+            comp = compare_file_with_baseline(
+                file_id=event["file_id"],
+                current_path=event["file_path"],
+                old_sha256=event["old_sha256"] or "",
+                new_sha256=event["new_sha256"] or "",
+                vault=_vault
+            )
+            if comp.raw_unified_diff:
+                for line in comp.raw_unified_diff.splitlines():
+                    safe = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                    if safe.startswith("+"):
+                        diff_html += f'<span class="diff-add">{safe}</span>\n'
+                    elif safe.startswith("-"):
+                        diff_html += f'<span class="diff-del">{safe}</span>\n'
+                    else:
+                        diff_html += f'<span class="diff-ctx">{safe}</span>\n'
+            else:
+                diff_html = f'<span class="diff-ctx">{diff_summary or "No diff data available."}</span>'
+        except Exception as e:
+            diff_html = f'<span class="diff-ctx">Diff unavailable: {e}</span>'
+    else:
+        diff_html = f'<span class="diff-ctx">{diff_summary or "No diff data stored for this event."}</span>'
+
+    event_color = "#FF5252" if event["event_type"] in ("MODIFIED", "DELETED") else "#00E676"
+
+    return HTML_TEMPLATE.format(
+        event_id=event["id"],
+        timestamp=event["timestamp"],
+        file_name=file_name,
+        file_path=event["file_path"],
+        event_type=event["event_type"],
+        event_color=event_color,
+        diff_summary=diff_summary,
+        risk_level=event["risk_level"],
+        risk_score=event["risk_score"],
+        old_sha256=event["old_sha256"] or "N/A (New File)",
+        new_sha256=event["new_sha256"] or "N/A (Deleted)",
+        old_sha3_256=event["old_sha3_256"] or "N/A (New File)",
+        new_sha3_256=event["new_sha3_256"] or "N/A (Deleted)",
+        heuristics_html=heuristics_html,
+        diff_html=diff_html,
+        ai_summary=ai_summary_text,
+        remediation_items_html=remediation_html,
+        novelty_statement=config.NOVELTY_STATEMENT
+    )

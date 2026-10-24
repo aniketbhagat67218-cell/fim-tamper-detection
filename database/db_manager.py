@@ -180,21 +180,26 @@ class DBManager:
             """, (status, now, file_id))
 
     def update_file_baseline(self, file_id: int, sha256: str, sha3_256: str,
-                             file_size: int, last_modified: float):
+                             file_size: int, last_modified: float,
+                             is_binary: bool = False):
         conn = self._get_connection()
         now = datetime.now().isoformat()
         with conn:
             conn.execute("""
             UPDATE monitored_files
             SET sha256 = ?, sha3_256 = ?, file_size = ?, last_modified = ?,
-                status = 'CLEAN', last_checked_at = ?
+                is_binary = ?, status = 'CLEAN', last_checked_at = ?
             WHERE id = ?
-            """, (sha256, sha3_256, file_size, last_modified, now, file_id))
+            """, (sha256, sha3_256, file_size, last_modified, 1 if is_binary else 0, now, file_id))
 
     def remove_monitored_file(self, file_id: int):
         conn = self._get_connection()
         with conn:
             conn.execute("DELETE FROM monitored_files WHERE id = ?", (file_id,))
+
+    def delete_monitored_file(self, file_id: int):
+        """Alias for remove_monitored_file."""
+        self.remove_monitored_file(file_id)
 
     # --- Baseline Snapshot Storage ---
 

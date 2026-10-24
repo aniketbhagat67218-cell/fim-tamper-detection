@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Integrity Monitoring & Tamper Detection</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>FIM Sentinel — File Integrity Monitoring & Tamper Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-base: #0B0E14;
@@ -18,6 +18,8 @@
             --amber: #FFB300;
             --crimson: #FF5252;
             --blue: #3B82F6;
+            --purple: #A855F7;
+            --sidebar-w: 270px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -26,18 +28,40 @@
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
+            font-size: 15px;
         }
-        /* Sidebar */
+
+        /* ─── DEMO BANNER ─── */
+        #demo-banner {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: linear-gradient(90deg, #7c3aed, #a855f7);
+            color: #fff;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            z-index: 9999;
+            box-shadow: 0 2px 12px rgba(168,85,247,0.4);
+        }
+        #demo-banner.active { display: block; }
+        body.demo-active { padding-top: 40px; }
+
+        /* ─── SIDEBAR ─── */
         aside {
-            width: 250px;
+            width: var(--sidebar-w);
             background-color: #080A0F;
             border-right: 1px solid var(--border);
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             position: fixed;
             height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
         }
         .brand {
             padding: 0 12px 20px;
@@ -48,27 +72,36 @@
             font-size: 10px;
             font-weight: 700;
             color: var(--cyan);
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
         .brand-title {
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 17px;
+            font-weight: 800;
             color: #FFF;
-            margin-top: 4px;
+            margin-top: 5px;
+            line-height: 1.2;
+        }
+        .nav-section {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 14px 14px 4px;
         }
         .nav-btn {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: 8px;
             color: var(--text-muted);
             text-decoration: none;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.18s;
             border: 1px solid transparent;
             background: none;
             width: 100%;
@@ -76,48 +109,71 @@
         }
         .nav-btn:hover { background-color: var(--bg-card); color: #FFF; }
         .nav-btn.active {
-            background-color: rgba(0, 240, 255, 0.1);
+            background-color: rgba(0,240,255,0.08);
             color: var(--cyan);
-            border-color: rgba(0, 240, 255, 0.2);
+            border-color: rgba(0,240,255,0.2);
         }
-        /* Main Content */
+        .nav-btn .icon { font-size: 18px; width: 24px; text-align: center; }
+        .demo-nav-btn {
+            margin-top: auto;
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(168,85,247,0.15));
+            border: 1px solid rgba(168,85,247,0.3) !important;
+            color: #c084fc !important;
+        }
+        .demo-nav-btn.active {
+            background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(168,85,247,0.3)) !important;
+            color: #e9d5ff !important;
+            border-color: #a855f7 !important;
+        }
+        .demo-nav-btn:hover { color: #f3e8ff !important; }
+
+        /* ─── MAIN ─── */
         main {
-            margin-left: 250px;
+            margin-left: var(--sidebar-w);
             flex: 1;
-            padding: 30px 40px;
-            max-width: 1400px;
+            padding: 32px 40px;
         }
         header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
+            align-items: flex-start;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 22px; font-weight: 700; color: #FFF; }
-        p.subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-        .header-actions { display: flex; gap: 10px; }
+        h1 { font-size: 24px; font-weight: 800; color: #FFF; letter-spacing: -0.3px; }
+        p.subtitle { font-size: 14px; color: var(--text-muted); margin-top: 5px; }
+        .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        /* ─── BUTTONS ─── */
         .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 13px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
             border: 1px solid transparent;
-            transition: all 0.2s;
+            transition: all 0.18s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
+            font-family: inherit;
+            white-space: nowrap;
         }
         .btn-primary { background: #1F6FEB; color: #FFF; }
-        .btn-primary:hover { background: #388BFD; }
-        .btn-success { background: #238636; color: #FFF; }
-        .btn-success:hover { background: #2EA043; }
-        .btn-danger { background: #DA3633; color: #FFF; }
-        .btn-danger:hover { background: #F85149; }
+        .btn-primary:hover { background: #388BFD; transform: translateY(-1px); }
+        .btn-success { background: #1a7f37; color: #FFF; }
+        .btn-success:hover { background: #2ea043; transform: translateY(-1px); }
+        .btn-danger { background: #b91c1c; color: #FFF; }
+        .btn-danger:hover { background: #da3633; }
         .btn-outline { background: var(--bg-card); border-color: var(--border); color: var(--text-main); }
-        .btn-outline:hover { background: var(--bg-card-hover); }
+        .btn-outline:hover { background: var(--bg-card-hover); border-color: #445; }
+        .btn-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; }
+        .btn-purple:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-lg { padding: 14px 28px; font-size: 16px; border-radius: 10px; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-        /* Stats Grid */
+        /* ─── STATS GRID ─── */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -127,109 +183,279 @@
         .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 18px 20px;
+            border-radius: 12px;
+            padding: 20px 22px;
+            transition: border-color 0.2s;
         }
-        .stat-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
-        .stat-value { font-size: 30px; font-weight: 700; margin: 6px 0 2px; }
-        .stat-sub { font-size: 11px; color: var(--text-muted); }
+        .stat-card:hover { border-color: #3a4560; }
+        .stat-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); font-weight: 700; }
+        .stat-value { font-size: 34px; font-weight: 800; margin: 8px 0 4px; }
+        .stat-sub { font-size: 12px; color: var(--text-muted); }
 
-        /* Card Section */
+        /* ─── CARDS ─── */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 24px;
             margin-bottom: 24px;
         }
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
+            padding-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .card-title { font-size: 15px; font-weight: 700; color: #FFF; }
+        .card-title { font-size: 16px; font-weight: 700; color: #FFF; }
+        .card-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
 
-        /* Table */
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; padding: 10px 14px; background: rgba(0,0,0,0.2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
-        td { padding: 12px 14px; border-bottom: 1px solid rgba(35, 41, 54, 0.6); }
-        tr:hover { background: rgba(255,255,255,0.02); }
+        /* ─── TABLES ─── */
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 11px 16px; background: rgba(0,0,0,0.25); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 1px solid var(--border); font-weight: 700; }
+        td { padding: 14px 16px; border-bottom: 1px solid rgba(35,41,54,0.7); vertical-align: middle; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        tr:last-child td { border-bottom: none; }
+
+        /* ─── BADGES ─── */
         .badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 5px;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .badge-clean { background: rgba(0, 230, 118, 0.15); color: var(--emerald); border: 1px solid rgba(0, 230, 118, 0.3); }
-        .badge-modified { background: rgba(255, 82, 82, 0.15); color: var(--crimson); border: 1px solid rgba(255, 82, 82, 0.3); }
-        .badge-high { background: rgba(255, 82, 82, 0.15); color: var(--crimson); font-weight: bold; }
-        .badge-medium { background: rgba(255, 179, 0, 0.15); color: var(--amber); }
-        .badge-low { background: rgba(0, 230, 118, 0.15); color: var(--emerald); }
-        .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #79C0FF; }
+        .badge-clean { background: rgba(0,230,118,0.12); color: var(--emerald); border: 1px solid rgba(0,230,118,0.25); }
+        .badge-modified { background: rgba(255,82,82,0.12); color: var(--crimson); border: 1px solid rgba(255,82,82,0.25); }
+        .badge-missing { background: rgba(255,179,0,0.12); color: var(--amber); border: 1px solid rgba(255,179,0,0.25); }
+        .badge-high { background: rgba(255,82,82,0.15); color: var(--crimson); border: 1px solid rgba(255,82,82,0.3); }
+        .badge-medium { background: rgba(255,179,0,0.15); color: var(--amber); border: 1px solid rgba(255,179,0,0.3); }
+        .badge-low { background: rgba(0,230,118,0.15); color: var(--emerald); border: 1px solid rgba(0,230,118,0.3); }
+        .badge-demo { background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #79C0FF; }
 
-        /* Diff Viewer */
+        /* ─── FILE UPLOAD ZONE ─── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0,240,255,0.02);
+            position: relative;
+        }
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--cyan);
+            background: rgba(0,240,255,0.06);
+        }
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .upload-icon { font-size: 48px; margin-bottom: 12px; }
+        .upload-title { font-size: 18px; font-weight: 700; color: #FFF; margin-bottom: 6px; }
+        .upload-sub { font-size: 13px; color: var(--text-muted); }
+        .upload-limit { font-size: 12px; color: var(--text-muted); margin-top: 8px; opacity: 0.7; }
+
+        .file-selected-info {
+            display: none;
+            background: rgba(0,240,255,0.06);
+            border: 1px solid rgba(0,240,255,0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 14px;
+            text-align: left;
+        }
+        .file-selected-info.visible { display: block; }
+        .file-name-display { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .file-meta-display { font-size: 13px; color: var(--text-muted); }
+
+        /* ─── HASH PREVIEW BOX ─── */
+        .hash-preview {
+            display: none;
+            background: #07090E;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+        .hash-preview.visible { display: block; }
+        .hash-row { display: flex; gap: 12px; margin-bottom: 8px; align-items: baseline; }
+        .hash-label { color: var(--text-muted); font-size: 11px; width: 80px; flex-shrink: 0; font-weight: 700; }
+        .hash-value { color: var(--cyan); word-break: break-all; }
+
+        /* ─── RESULT TOAST / ALERT BOX ─── */
+        .result-box {
+            display: none;
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-top: 14px;
+            border-left: 5px solid;
+            font-size: 15px;
+        }
+        .result-box.visible { display: block; }
+        .result-box.success { background: rgba(0,230,118,0.07); border-color: var(--emerald); }
+        .result-box.error { background: rgba(255,82,82,0.07); border-color: var(--crimson); }
+        .result-box.warning { background: rgba(255,179,0,0.07); border-color: var(--amber); }
+        .result-box .result-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+        .result-box.success .result-title { color: var(--emerald); }
+        .result-box.error .result-title { color: var(--crimson); }
+        .result-box.warning .result-title { color: var(--amber); }
+
+        /* ─── DIFF VIEWER ─── */
         .diff-box {
             background: #07090E;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 12px;
+            border-radius: 8px;
+            padding: 14px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            line-height: 1.6;
-            max-height: 380px;
+            font-size: 13px;
+            line-height: 1.65;
+            max-height: 420px;
             overflow: auto;
             white-space: pre-wrap;
         }
-        .diff-add { color: #7EE787; background: rgba(46, 160, 67, 0.15); display: block; }
-        .diff-del { color: #FF7B72; background: rgba(248, 81, 73, 0.15); display: block; }
+        .diff-add { color: #7EE787; background: rgba(46,160,67,0.12); display: block; }
+        .diff-del { color: #FF7B72; background: rgba(248,81,73,0.12); display: block; }
         .diff-ctx { color: var(--text-muted); display: block; }
 
-        /* Input Form */
-        .input-group {
+        /* ─── TABS ─── */
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* ─── SPINNER ─── */
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ─── PROGRESS BAR ─── */
+        .progress-bar-wrap { background: rgba(0,0,0,0.3); border-radius: 4px; height: 6px; margin-top: 8px; overflow: hidden; display: none; }
+        .progress-bar-fill { height: 100%; background: var(--cyan); border-radius: 4px; transition: width 0.3s; }
+        .progress-bar-wrap.visible { display: block; }
+
+        /* ─── WORKFLOW STEPS ─── */
+        .workflow-steps {
             display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        input[type="text"] {
-            flex: 1;
-            background: #0B0E14;
+            gap: 0;
+            margin-bottom: 28px;
             border: 1px solid var(--border);
-            padding: 10px 14px;
-            border-radius: 6px;
-            color: #FFF;
-            font-size: 13px;
-            font-family: inherit;
+            border-radius: 12px;
+            overflow: hidden;
         }
-        input[type="text"]:focus { outline: none; border-color: var(--cyan); }
+        .workflow-step {
+            flex: 1;
+            padding: 18px 20px;
+            text-align: center;
+            border-right: 1px solid var(--border);
+            background: var(--bg-card);
+            position: relative;
+        }
+        .workflow-step:last-child { border-right: none; }
+        .workflow-step.active { background: rgba(0,240,255,0.05); }
+        .workflow-step .step-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+        }
+        .workflow-step.active .step-num {
+            background: var(--cyan);
+            color: #000;
+        }
+        .workflow-step.done .step-num { background: var(--emerald); color: #000; }
+        .workflow-step .step-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        .workflow-step.active .step-label { color: var(--cyan); }
+        .workflow-step.done .step-label { color: var(--emerald); }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 900px) {
+            aside { width: 200px; }
+            main { margin-left: 200px; padding: 20px; }
+        }
+        @media (max-width: 700px) {
+            aside { display: none; }
+            main { margin-left: 0; padding: 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 20px; }
+        }
+
+        /* ─── SMARTBOARD OPTIMIZATIONS (large touch targets) ─── */
+        @media (min-width: 1400px) {
+            body { font-size: 16px; }
+            .btn { padding: 12px 24px; font-size: 15px; }
+            .btn-lg { padding: 16px 34px; font-size: 18px; }
+            .nav-btn { padding: 14px 16px; font-size: 15px; }
+            h1 { font-size: 26px; }
+            .stat-value { font-size: 38px; }
+            td, th { padding: 16px 18px; font-size: 15px; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- DEMO MODE BANNER -->
+    <div id="demo-banner">
+        🎭 DEMO MODE ACTIVE — Showing simulated data for presentation purposes. Real monitoring data is separate.
+        <button onclick="exitDemo()" style="margin-left: 20px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 3px 12px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 13px;">Exit Demo</button>
+    </div>
+
+    <!-- SIDEBAR -->
     <aside>
         <div class="brand">
             <div class="brand-badge">FIM SENTINEL</div>
-            <div class="brand-title">File Integrity Monitor</div>
+            <div class="brand-title">File Integrity<br>Monitor</div>
         </div>
-        <button class="nav-btn active" onclick="showTab('dashboard')">⚡ Dashboard</button>
-        <button class="nav-btn" onclick="showTab('scanner')">🔍 Protect Asset</button>
-        <button class="nav-btn" onclick="showTab('assets')">🛡️ Monitored Assets</button>
-        <button class="nav-btn" onclick="showTab('diff')">📊 Change Analysis</button>
-        <button class="nav-btn" onclick="showTab('reports')">📑 Forensic Reports</button>
+        <span class="nav-section">Operations</span>
+        <button class="nav-btn active" onclick="showTab('dashboard', this)"><span class="icon">⚡</span> Dashboard</button>
+        <button class="nav-btn" onclick="showTab('protect', this)"><span class="icon">🛡️</span> Protect Asset</button>
+        <button class="nav-btn" onclick="showTab('assets', this)"><span class="icon">📁</span> Monitored Assets</button>
+        <span class="nav-section">Analysis</span>
+        <button class="nav-btn" onclick="showTab('diff', this)"><span class="icon">📊</span> Change Analysis</button>
+        <button class="nav-btn" onclick="showTab('audit', this)"><span class="icon">📋</span> Audit History</button>
+        <button class="nav-btn" onclick="showTab('ai', this)"><span class="icon">✨</span> AI Security Analysis</button>
+        <button class="nav-btn" onclick="showTab('reports', this)"><span class="icon">📑</span> Forensic Reports</button>
+        <span class="nav-section" style="margin-top: auto;">Presentation</span>
+        <button class="nav-btn demo-nav-btn" id="demo-nav-btn" onclick="showTab('demo', this)"><span class="icon">🎭</span> Demo Mode</button>
     </aside>
 
+    <!-- MAIN -->
     <main>
         <header>
             <div>
                 <h1 id="page-title">SECURITY OPERATIONS DASHBOARD</h1>
-                <p class="subtitle" id="page-sub">Dual-Primitive Cryptographic Baseline & Real-Time Tamper Triage</p>
+                <p class="subtitle" id="page-sub">Dual-Primitive SHA-256 / SHA-3-256 Cryptographic Baseline & Tamper Detection</p>
             </div>
             <div class="header-actions">
-                <button class="btn btn-primary" id="btn-toggle-monitor" onclick="toggleMonitor()">▶ Start Real-Time Monitor</button>
-                <button class="btn btn-outline" onclick="verifyAll()">⚡ Run Integrity Scan</button>
+                <button class="btn btn-outline" id="btn-toggle-monitor" onclick="toggleMonitor()">▶ Start Real-Time Monitor</button>
+                <button class="btn btn-primary" onclick="verifyAll()">⚡ Run Integrity Scan</button>
             </div>
         </header>
 
@@ -237,32 +463,35 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">Monitored Assets</div>
-                <div class="stat-value" id="stat-total" style="color: var(--cyan);">0</div>
-                <div class="stat-sub">Protected in SQLite</div>
+                <div class="stat-value" id="stat-total" style="color:var(--cyan)">0</div>
+                <div class="stat-sub">Protected in SQLite vault</div>
             </div>
             <div class="stat-card">
                 <div class="stat-title">Clean Assets</div>
-                <div class="stat-value" id="stat-clean" style="color: var(--emerald);">0</div>
+                <div class="stat-value" id="stat-clean" style="color:var(--emerald)">0</div>
                 <div class="stat-sub">Hashes intact</div>
             </div>
             <div class="stat-card">
                 <div class="stat-title">Tampering Alerts</div>
-                <div class="stat-value" id="stat-alerts" style="color: var(--crimson);">0</div>
+                <div class="stat-value" id="stat-alerts" style="color:var(--crimson)">0</div>
                 <div class="stat-sub">Violations detected</div>
             </div>
             <div class="stat-card">
                 <div class="stat-title">Watchdog Engine</div>
-                <div class="stat-value" id="stat-watchdog" style="color: var(--text-muted); font-size: 22px;">IDLE</div>
-                <div class="stat-sub">750ms lock debouncer</div>
+                <div class="stat-value" id="stat-watchdog" style="color:var(--text-muted);font-size:22px">IDLE</div>
+                <div class="stat-sub">Cloud: upload-based verify</div>
             </div>
         </div>
 
-        <!-- TAB 1: DASHBOARD -->
-        <div id="tab-dashboard" class="tab-pane">
+        <!-- ══════════════════════════════ TAB: DASHBOARD ══════════════════════════════ -->
+        <div id="tab-dashboard" class="tab-pane active">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Live Forensic Activity Feed</div>
-                    <span style="font-size: 11px; color: var(--emerald);">● Live Auto-refresh (3s)</span>
+                    <div>
+                        <div class="card-title">Live Forensic Activity Feed</div>
+                        <div class="card-sub">Auto-refreshes every 4 seconds</div>
+                    </div>
+                    <span style="font-size: 12px; color: var(--emerald);">● Live</span>
                 </div>
                 <table>
                     <thead>
@@ -271,365 +500,972 @@
                             <th>Target Asset</th>
                             <th>Event</th>
                             <th>Risk Level</th>
-                            <th>Delta Highlights</th>
-                            <th>Action</th>
+                            <th>Delta</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="events-tbody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading events...</td></tr>
+                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Loading events...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- TAB 2: SCANNER (Add new file) -->
-        <div id="tab-scanner" class="tab-pane" style="display: none;">
+        <!-- ══════════════════════════════ TAB: PROTECT ASSET ══════════════════════════════ -->
+        <div id="tab-protect" class="tab-pane">
+
+            <!-- Workflow indicator -->
+            <div class="workflow-steps">
+                <div class="workflow-step active" id="wf-step-1">
+                    <div class="step-num">1</div>
+                    <div class="step-label">Choose File</div>
+                </div>
+                <div class="workflow-step" id="wf-step-2">
+                    <div class="step-num">2</div>
+                    <div class="step-label">Preview Hashes</div>
+                </div>
+                <div class="workflow-step" id="wf-step-3">
+                    <div class="step-num">3</div>
+                    <div class="step-label">Set Baseline</div>
+                </div>
+                <div class="workflow-step" id="wf-step-4">
+                    <div class="step-num">4</div>
+                    <div class="step-label">Verify Integrity</div>
+                </div>
+            </div>
+
+            <!-- Step 1 & 2: Choose + Baseline -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Add Asset to Cryptographic Baseline</div>
+                    <div>
+                        <div class="card-title">🛡️ Establish Trusted Baseline</div>
+                        <div class="card-sub">Upload any file — dual hashes are computed server-side and stored as your trusted baseline.</div>
+                    </div>
                 </div>
-                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-                    Enter the absolute path of any file on your computer to calculate dual SHA-256 / SHA-3-256 hashes and save a trusted baseline snapshot in the vault.
-                </p>
-                <div class="input-group">
-                    <input type="text" id="scan-path-input" placeholder="e.g. C:/Users/DELL/OneDrive/Documents/PROJECT MDC ALPHA/test_sample.txt">
-                    <button class="btn btn-outline" onclick="previewScan()">Preview Dual Hash</button>
-                    <button class="btn btn-success" onclick="baselineFile()">🛡️ Establish Baseline & Vault</button>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="upload-zone-baseline" ondragover="onDragOver(event,'baseline')" ondragleave="onDragLeave('baseline')" ondrop="onDrop(event,'baseline')">
+                    <input type="file" id="baseline-file-input" onchange="onFileSelected('baseline')">
+                    <div class="upload-icon">📂</div>
+                    <div class="upload-title">Choose File or Drag & Drop</div>
+                    <div class="upload-sub">Click anywhere in this area to open file browser</div>
+                    <div class="upload-limit">Max 10 MB · Any file type</div>
                 </div>
-                <div id="scan-preview-box" style="display: none; margin-top: 16px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 6px; font-size: 12px;"></div>
+
+                <!-- Selected file info -->
+                <div class="file-selected-info" id="baseline-file-info">
+                    <div class="file-name-display" id="baseline-file-name">-</div>
+                    <div class="file-meta-display" id="baseline-file-meta">-</div>
+                </div>
+
+                <!-- Hash preview -->
+                <div class="hash-preview" id="baseline-hash-preview">
+                    <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;letter-spacing:1px;">DUAL-PRIMITIVE CRYPTOGRAPHIC FINGERPRINT</div>
+                    <div class="hash-row"><span class="hash-label">SHA-256</span><span class="hash-value" id="prev-sha256">—</span></div>
+                    <div class="hash-row"><span class="hash-label">SHA-3-256</span><span class="hash-value" id="prev-sha3">—</span></div>
+                    <div class="hash-row"><span class="hash-label">SIZE</span><span class="hash-value" id="prev-size">—</span></div>
+                </div>
+
+                <!-- Result -->
+                <div class="result-box" id="baseline-result"></div>
+
+                <!-- Progress -->
+                <div class="progress-bar-wrap" id="baseline-progress"><div class="progress-bar-fill" style="width:0%"></div></div>
+
+                <!-- Action buttons -->
+                <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;">
+                    <button class="btn btn-success btn-lg" id="btn-set-baseline" onclick="uploadBaseline()" disabled>
+                        🛡️ Establish Baseline & Vault
+                    </button>
+                    <button class="btn btn-outline" onclick="clearBaselineForm()">✕ Clear</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Verify -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🔍 Verify File Integrity</div>
+                        <div class="card-sub">Upload the same file again to compare against its stored baseline. Any tampering is detected instantly.</div>
+                    </div>
+                </div>
+
+                <div class="upload-zone" id="upload-zone-verify" ondragover="onDragOver(event,'verify')" ondragleave="onDragLeave('verify')" ondrop="onDrop(event,'verify')">
+                    <input type="file" id="verify-file-input" onchange="onFileSelected('verify')">
+                    <div class="upload-icon">🔍</div>
+                    <div class="upload-title">Upload File to Verify</div>
+                    <div class="upload-sub">Upload the same filename that was previously baselined</div>
+                </div>
+
+                <div class="file-selected-info" id="verify-file-info">
+                    <div class="file-name-display" id="verify-file-name">-</div>
+                    <div class="file-meta-display" id="verify-file-meta">-</div>
+                </div>
+
+                <div class="result-box" id="verify-result"></div>
+
+                <!-- Inline diff after verify -->
+                <div id="verify-diff-section" style="display:none;margin-top:18px;">
+                    <div style="font-size:12px;font-weight:700;color:var(--crimson);margin-bottom:8px;letter-spacing:1px;">⚠ TAMPER DIFF — BASELINE VS UPLOADED</div>
+                    <div class="diff-box" id="verify-diff-box"></div>
+                    <div id="verify-heuristics-box" style="margin-top:14px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;"></div>
+                    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" id="btn-view-report-inline" onclick="" style="display:none;">📑 View Full Forensic Report</button>
+                    </div>
+                </div>
+
+                <div class="progress-bar-wrap" id="verify-progress"><div class="progress-bar-fill" style="width:0%"></div></div>
+
+                <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;">
+                    <button class="btn btn-primary btn-lg" id="btn-verify-now" onclick="uploadVerify()" disabled>
+                        🔍 Verify Integrity Now
+                    </button>
+                    <button class="btn btn-outline" onclick="clearVerifyForm()">✕ Clear</button>
+                </div>
             </div>
         </div>
 
-        <!-- TAB 3: ASSETS -->
-        <div id="tab-assets" class="tab-pane" style="display: none;">
+        <!-- ══════════════════════════════ TAB: MONITORED ASSETS ══════════════════════════════ -->
+        <div id="tab-assets" class="tab-pane">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Monitored Assets Inventory</div>
-                    <button class="btn btn-outline" onclick="loadFiles()">Refresh</button>
+                    <div>
+                        <div class="card-title">Monitored Assets Inventory</div>
+                        <div class="card-sub">All files registered in the cryptographic baseline vault</div>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-outline" onclick="loadFiles()">↻ Refresh</button>
+                    </div>
                 </div>
                 <table>
                     <thead>
                         <tr>
                             <th>File Name</th>
-                            <th>Full Path</th>
+                            <th>Source / Path</th>
                             <th>Status</th>
                             <th>Size</th>
                             <th>Baseline SHA-256</th>
-                            <th>Action</th>
+                            <th>Added</th>
                         </tr>
                     </thead>
                     <tbody id="files-tbody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading assets...</td></tr>
+                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Loading assets...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- TAB 4: DIFF & ANALYSIS -->
-        <div id="tab-diff" class="tab-pane" style="display: none;">
+        <!-- ══════════════════════════════ TAB: CHANGE ANALYSIS ══════════════════════════════ -->
+        <div id="tab-diff" class="tab-pane">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title" id="diff-target-title">Forensic Diff Inspection</div>
                     <button class="btn btn-primary" id="btn-ai-triage" onclick="runAiTriage()">✨ Generate AI Threat Advisory</button>
                 </div>
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
                     <div>
-                        <div style="font-size: 11px; font-weight: 700; color: var(--cyan); margin-bottom: 8px;">UNIFIED LINE DIFF (BASELINE VS CURRENT)</div>
-                        <div class="diff-box" id="diff-content-box">Select an asset or incident to view granular line differences.</div>
+                        <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:8px;letter-spacing:1px;">UNIFIED LINE DIFF (BASELINE VS CURRENT)</div>
+                        <div class="diff-box" id="diff-content-box">Select an asset or incident from Dashboard or Audit History to view granular diff.</div>
                     </div>
                     <div>
-                        <div style="font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 8px;">HEURISTIC RISK ASSESSMENT</div>
-                        <div id="heuristic-results-box" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 14px; border-radius: 6px; font-size: 12px; margin-bottom: 14px;">
-                            No file loaded.
+                        <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:8px;letter-spacing:1px;">HEURISTIC RISK ASSESSMENT</div>
+                        <div id="heuristic-results-box" style="background:rgba(0,0,0,0.25);border:1px solid var(--border);padding:16px;border-radius:8px;font-size:13px;margin-bottom:14px;">
+                            No file loaded yet.
                         </div>
-                        <div style="font-size: 11px; font-weight: 700; color: var(--cyan); margin-bottom: 8px;">AI THREAT REMEDIATION ADVICE</div>
-                        <div id="ai-results-box" style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); padding: 14px; border-radius: 6px; font-size: 12px;">
-                            Click 'Generate AI Threat Advisory' to redact credentials and triage with AI.
+                        <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:8px;letter-spacing:1px;">AI THREAT ADVISORY</div>
+                        <div id="ai-results-box" style="background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.15);padding:16px;border-radius:8px;font-size:13px;">
+                            Click 'Generate AI Threat Advisory' after loading a diff.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 5: REPORTS -->
-        <div id="tab-reports" class="tab-pane" style="display: none;">
+        <!-- ══════════════════════════════ TAB: AUDIT HISTORY ══════════════════════════════ -->
+        <div id="tab-audit" class="tab-pane">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Generated Forensic Compliance Reports</div>
+                    <div>
+                        <div class="card-title">Forensic Audit Event History</div>
+                        <div class="card-sub">Complete chronological tamper event log</div>
+                    </div>
+                    <button class="btn btn-outline" onclick="loadEvents()">↻ Refresh</button>
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Report Name</th>
-                            <th>Format</th>
-                            <th>Size</th>
-                            <th>Action</th>
+                            <th>#</th>
+                            <th>Timestamp</th>
+                            <th>Asset</th>
+                            <th>Event</th>
+                            <th>Risk</th>
+                            <th>Delta</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="reports-tbody">
-                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading reports...</td></tr>
+                    <tbody id="audit-tbody">
+                        <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">Loading audit history...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- ══════════════════════════════ TAB: AI SECURITY ANALYSIS ══════════════════════════════ -->
+        <div id="tab-ai" class="tab-pane">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">✨ AI Security Analysis</div>
+                        <div class="card-sub">Privacy-preserving AI triage — credentials redacted locally before any API call</div>
+                    </div>
+                </div>
+                <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px;">
+                    Select an event from <strong style="color:#fff">Audit History</strong> or <strong style="color:#fff">Dashboard</strong> and click <strong style="color:var(--cyan)">Inspect Diff</strong> to load it here. Then click <em>Generate AI Advisory</em> above.
+                </p>
+                <div id="ai-standalone-box" style="background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.15);padding:24px;border-radius:10px;font-size:14px;line-height:1.7;">
+                    No event loaded. Navigate to Dashboard → click an event's <em>Inspect Diff</em> action.
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════ TAB: FORENSIC REPORTS ══════════════════════════════ -->
+        <div id="tab-reports" class="tab-pane">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Forensic Compliance Reports</div>
+                        <div class="card-sub">Professionally formatted HTML reports for each tampering event — opened inline in browser</div>
+                    </div>
+                    <button class="btn btn-outline" onclick="loadReports()">↻ Refresh</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Incident #</th>
+                            <th>Asset</th>
+                            <th>Risk</th>
+                            <th>Timestamp</th>
+                            <th>Summary</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-tbody">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Loading reports...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════ TAB: DEMO MODE ══════════════════════════════ -->
+        <div id="tab-demo" class="tab-pane">
+            <div class="card" style="border-color:rgba(168,85,247,0.3);background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(168,85,247,0.05));">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title" style="color:#c084fc;">🎭 Demo Mode — College Presentation</div>
+                        <div class="card-sub">Simulated realistic attack scenarios for live demonstration without requiring local file access</div>
+                    </div>
+                    <span class="badge badge-demo">DEMO ONLY</span>
+                </div>
+
+                <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:20px;margin-bottom:20px;font-size:14px;line-height:1.8;">
+                    <strong style="color:#c084fc;">What Demo Mode does:</strong><br>
+                    Seeds 3 realistic sample files into the database — a config file, an auth handler (with backdoor injection), and a readme.
+                    Two files show HIGH and MEDIUM risk tampering events with heuristic analysis and forensic reports.
+                    All demo data is <strong style="color:#fff;">clearly labelled</strong> and completely separate from real monitoring data.
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+                    <div style="background:rgba(255,82,82,0.08);border:1px solid rgba(255,82,82,0.2);border-radius:10px;padding:16px;">
+                        <div style="font-size:20px;margin-bottom:8px;">🔴 config.ini</div>
+                        <div style="font-weight:700;color:var(--crimson);font-size:14px;">MEDIUM Risk Tamper</div>
+                        <div style="color:var(--text-muted);font-size:13px;margin-top:4px;">Hostname + credentials replaced with malicious server details</div>
+                    </div>
+                    <div style="background:rgba(255,82,82,0.12);border:1px solid rgba(255,82,82,0.3);border-radius:10px;padding:16px;">
+                        <div style="font-size:20px;margin-bottom:8px;">🔴 auth_handler.py</div>
+                        <div style="font-weight:700;color:var(--crimson);font-size:14px;">HIGH Risk Tamper</div>
+                        <div style="color:var(--text-muted);font-size:13px;margin-top:4px;">Backdoor authentication bypass + privilege escalation injected</div>
+                    </div>
+                    <div style="background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:16px;">
+                        <div style="font-size:20px;margin-bottom:8px;">🟢 readme.md</div>
+                        <div style="font-weight:700;color:var(--emerald);font-size:14px;">CLEAN — No Tampering</div>
+                        <div style="color:var(--text-muted);font-size:13px;margin-top:4px;">Documentation file — integrity verified, hashes match baseline</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-purple btn-lg" id="btn-seed-demo" onclick="seedDemo()">
+                        🎭 Activate Demo Mode
+                    </button>
+                    <button class="btn btn-outline" id="btn-clear-demo" onclick="clearDemo()">
+                        🗑️ Clear Demo Data
+                    </button>
+                </div>
+                <div class="result-box" id="demo-result" style="margin-top:16px;"></div>
+            </div>
+
+            <!-- Demo workflow guide -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📋 Presentation Workflow Guide</div>
+                </div>
+                <ol style="padding-left:20px;font-size:14px;line-height:2.2;color:var(--text-main);">
+                    <li>Click <strong style="color:#c084fc;">Activate Demo Mode</strong> — seeds 3 sample files with tamper events</li>
+                    <li>Navigate to <strong style="color:var(--cyan);">Dashboard</strong> — show the live forensic activity feed with tamper events</li>
+                    <li>Click <strong style="color:var(--cyan);">Monitored Assets</strong> — show the 3 protected files with CLEAN / MODIFIED status badges</li>
+                    <li>Click <strong>Inspect Diff</strong> on any HIGH risk event — navigate to <strong style="color:var(--cyan);">Change Analysis</strong></li>
+                    <li>Click <strong style="color:var(--cyan);">✨ Generate AI Threat Advisory</strong> — show offline heuristic analysis</li>
+                    <li>Navigate to <strong style="color:var(--cyan);">Forensic Reports</strong> — click <strong>View Report</strong> for a professional incident report</li>
+                    <li>Navigate to <strong style="color:var(--cyan);">Protect Asset</strong> — demonstrate the upload-based baseline + verify workflow live</li>
+                </ol>
+            </div>
+        </div>
+
     </main>
 
     <script>
-        let currentFileId = null;
+    // ═══════════════════════════════════════════════════════
+    //  STATE
+    // ═══════════════════════════════════════════════════════
+    let currentFileId = null;
+    let currentEventId = null;
+    let baselineFile = null;
+    let verifyFile = null;
+    let demoActive = false;
 
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabName).style.display = 'block';
-            event.target.classList.add('active');
+    // ═══════════════════════════════════════════════════════
+    //  TAB NAVIGATION
+    // ═══════════════════════════════════════════════════════
+    function showTab(tabName, btn) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabName).classList.add('active');
+        if (btn) btn.classList.add('active');
 
-            if(tabName === 'dashboard') loadEvents();
-            if(tabName === 'assets') loadFiles();
-            if(tabName === 'reports') loadReports();
+        const titles = {
+            dashboard: ['SECURITY OPERATIONS DASHBOARD', 'Dual-Primitive Cryptographic Baseline & Real-Time Tamper Triage'],
+            protect:   ['PROTECT ASSET', 'Upload a file to establish a cryptographic baseline or verify integrity'],
+            assets:    ['MONITORED ASSETS', 'All files registered in the cryptographic baseline vault'],
+            diff:      ['CHANGE ANALYSIS', 'Forensic diff inspection with heuristic risk scoring'],
+            audit:     ['AUDIT EVENT HISTORY', 'Complete chronological tampering event log'],
+            ai:        ['AI SECURITY ANALYSIS', 'Privacy-preserving threat advisory via Google Gemini'],
+            reports:   ['FORENSIC REPORTS', 'Professionally formatted HTML compliance reports'],
+            demo:      ['DEMO MODE 🎭', 'Simulate a realistic attack scenario for college presentation'],
+        };
+        if (titles[tabName]) {
+            document.getElementById('page-title').textContent = titles[tabName][0];
+            document.getElementById('page-sub').textContent = titles[tabName][1];
         }
 
-        async function fetchStats() {
-            try {
-                const res = await fetch('/api/stats');
-                const data = await res.json();
-                document.getElementById('stat-total').textContent = data.total_files;
-                document.getElementById('stat-clean').textContent = data.clean_files;
-                document.getElementById('stat-alerts').textContent = data.modified_files + data.missing_files;
+        if (tabName === 'dashboard') loadEvents();
+        if (tabName === 'assets')    loadFiles();
+        if (tabName === 'audit')     loadEvents(true);
+        if (tabName === 'reports')   loadReports();
+    }
 
-                const wd = document.getElementById('stat-watchdog');
-                const btn = document.getElementById('btn-toggle-monitor');
-                if (data.monitor_running) {
-                    wd.textContent = 'ACTIVE';
-                    wd.style.color = 'var(--emerald)';
-                    btn.textContent = '⏹ Stop Real-Time Monitor';
-                    btn.className = 'btn btn-danger';
+    // ═══════════════════════════════════════════════════════
+    //  STATS
+    // ═══════════════════════════════════════════════════════
+    async function fetchStats() {
+        try {
+            const res = await fetch('/api/stats');
+            const d = await res.json();
+            document.getElementById('stat-total').textContent = d.total_files;
+            document.getElementById('stat-clean').textContent = d.clean_files;
+            document.getElementById('stat-alerts').textContent = (d.modified_files || 0) + (d.missing_files || 0);
+
+            const wd = document.getElementById('stat-watchdog');
+            const btn = document.getElementById('btn-toggle-monitor');
+            if (d.serverless) {
+                wd.textContent = 'CLOUD';
+                wd.style.color = 'var(--blue)';
+                btn.textContent = '☁ Cloud Mode';
+                btn.className = 'btn btn-outline';
+                btn.title = 'Real-time monitoring runs locally. Use Upload & Verify for cloud integrity checks.';
+            } else if (d.monitor_running) {
+                wd.textContent = 'ACTIVE';
+                wd.style.color = 'var(--emerald)';
+                btn.textContent = '⏹ Stop Monitor';
+                btn.className = 'btn btn-danger';
+            } else {
+                wd.textContent = 'IDLE';
+                wd.style.color = 'var(--text-muted)';
+                btn.textContent = '▶ Start Monitor';
+                btn.className = 'btn btn-outline';
+            }
+        } catch(e) { console.error('Stats:', e); }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  EVENTS / AUDIT
+    // ═══════════════════════════════════════════════════════
+    async function loadEvents(forAudit = false) {
+        try {
+            const res = await fetch('/api/events');
+            const data = await res.json();
+
+            const tbodyId = forAudit ? 'audit-tbody' : 'events-tbody';
+            const cols    = forAudit ? 7 : 6;
+            const tbody = document.getElementById(tbodyId);
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;color:var(--text-muted);padding:30px">No tampering events recorded yet. Establish a baseline and verify a file.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(ev => {
+                const fname = ev.file_path ? ev.file_path.split(/[/\\]/).pop() : '—';
+                const isDemo = ev.file_path && ev.file_path.startsWith('[demo]');
+                const demoBadge = isDemo ? '<span class="badge badge-demo" style="margin-left:6px">DEMO</span>' : '';
+                const riskClass = `badge-${(ev.risk_level||'low').toLowerCase()}`;
+
+                const auditId = forAudit ? `<td class="mono">#${ev.id}</td>` : '';
+
+                return `
+                <tr>
+                    ${auditId}
+                    <td class="mono" style="font-size:12px">${(ev.timestamp||'').substring(0,19)}</td>
+                    <td><strong>${fname}</strong>${demoBadge}<br>
+                        <span class="mono" style="font-size:10px;color:var(--text-muted)">${ev.file_path||''}</span></td>
+                    <td><span class="badge badge-modified">${ev.event_type||'MODIFIED'}</span></td>
+                    <td><span class="badge ${riskClass}">${ev.risk_level} (${ev.risk_score}/100)</span></td>
+                    <td style="font-size:13px">${ev.diff_summary || '—'}</td>
+                    <td style="white-space:nowrap">
+                        ${ev.file_id ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="inspectDiff(${ev.file_id})">📊 Inspect Diff</button>` : ''}
+                        <button class="btn btn-primary" style="padding:5px 10px;font-size:12px" onclick="viewReport(${ev.id})">📑 Report</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch(e) { console.error('Events:', e); }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  FILES / ASSETS
+    // ═══════════════════════════════════════════════════════
+    async function loadFiles() {
+        try {
+            const res = await fetch('/api/files');
+            const data = await res.json();
+            const tbody = document.getElementById('files-tbody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No assets registered. Use "Protect Asset" tab to upload and baseline a file.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(f => {
+                const isDemo = f.file_path && f.file_path.startsWith('[demo]');
+                const isUpload = f.file_path && f.file_path.startsWith('[uploaded]');
+                const source = isDemo ? '<span class="badge badge-demo">DEMO</span>' : (isUpload ? '<span class="badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3)">UPLOADED</span>' : '<span class="badge badge-clean">LOCAL</span>');
+                const statusClass = f.status === 'CLEAN' ? 'badge-clean' : (f.status === 'MISSING' ? 'badge-missing' : 'badge-modified');
+                const added = (f.created_at || '').substring(0,10);
+                return `
+                <tr>
+                    <td><strong>${f.file_name}</strong></td>
+                    <td>${source}</td>
+                    <td><span class="badge ${statusClass}">${f.status}</span></td>
+                    <td>${(f.file_size || 0).toLocaleString()} B</td>
+                    <td class="mono" style="font-size:11px">${(f.sha256||'').substring(0,20)}…</td>
+                    <td>${added}</td>
+                </tr>`;
+            }).join('');
+        } catch(e) { console.error('Files:', e); }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  MONITOR TOGGLE
+    // ═══════════════════════════════════════════════════════
+    async function toggleMonitor() {
+        const res = await fetch('/api/toggle_monitor', { method: 'POST' });
+        const d = await res.json();
+        if (d.serverless) {
+            showToast('☁ Cloud Deployment', d.message || 'Real-time monitoring not available. Use Upload & Verify instead.', 'info');
+        }
+        fetchStats();
+    }
+
+    async function verifyAll() {
+        const res = await fetch('/api/verify_all', { method: 'POST' });
+        const d = await res.json();
+        if (d.serverless) {
+            showToast('☁ Cloud Mode', 'Use the Upload & Verify button to check individual files.', 'info');
+        } else {
+            showToast('✅ Scan Complete', `Scanned ${d.count || 0} assets.`, 'success');
+        }
+        fetchStats();
+        loadEvents();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  FILE UPLOAD — DRAG & DROP
+    // ═══════════════════════════════════════════════════════
+    function onDragOver(e, mode) {
+        e.preventDefault();
+        document.getElementById(`upload-zone-${mode}`).classList.add('drag-over');
+    }
+    function onDragLeave(mode) {
+        document.getElementById(`upload-zone-${mode}`).classList.remove('drag-over');
+    }
+    function onDrop(e, mode) {
+        e.preventDefault();
+        document.getElementById(`upload-zone-${mode}`).classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        if (mode === 'baseline') {
+            document.getElementById('baseline-file-input').files = e.dataTransfer.files;
+            setBaselineFile(file);
+        } else {
+            document.getElementById('verify-file-input').files = e.dataTransfer.files;
+            setVerifyFile(file);
+        }
+    }
+
+    function onFileSelected(mode) {
+        const input = document.getElementById(`${mode}-file-input`);
+        const file = input.files[0];
+        if (!file) return;
+        if (mode === 'baseline') setBaselineFile(file);
+        else setVerifyFile(file);
+    }
+
+    function setBaselineFile(file) {
+        baselineFile = file;
+        document.getElementById('baseline-file-info').classList.add('visible');
+        document.getElementById('baseline-file-name').textContent = '📄 ' + file.name;
+        document.getElementById('baseline-file-meta').textContent = `${formatBytes(file.size)} · ${file.type || 'application/octet-stream'} · Modified: ${new Date(file.lastModified).toLocaleString()}`;
+        document.getElementById('btn-set-baseline').disabled = false;
+        document.getElementById('baseline-result').classList.remove('visible');
+
+        // Show hash preview immediately using client-side SHA-256 (WebCrypto)
+        previewHashes(file);
+
+        // Update workflow step
+        setWorkflowStep(2);
+    }
+
+    function setVerifyFile(file) {
+        verifyFile = file;
+        document.getElementById('verify-file-info').classList.add('visible');
+        document.getElementById('verify-file-name').textContent = '📄 ' + file.name;
+        document.getElementById('verify-file-meta').textContent = `${formatBytes(file.size)} · ${file.type || 'binary'}`;
+        document.getElementById('btn-verify-now').disabled = false;
+        document.getElementById('verify-result').classList.remove('visible');
+        document.getElementById('verify-diff-section').style.display = 'none';
+    }
+
+    async function previewHashes(file) {
+        const preview = document.getElementById('baseline-hash-preview');
+        preview.classList.add('visible');
+        document.getElementById('prev-sha256').textContent = '⏳ computing...';
+        document.getElementById('prev-sha3').textContent = '(SHA-3 computed server-side on upload)';
+        document.getElementById('prev-size').textContent = formatBytes(file.size);
+
+        // Use WebCrypto for instant SHA-256 preview
+        try {
+            const buffer = await file.arrayBuffer();
+            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hex = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+            document.getElementById('prev-sha256').textContent = hex;
+        } catch(e) {
+            document.getElementById('prev-sha256').textContent = '(will compute server-side)';
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  UPLOAD BASELINE
+    // ═══════════════════════════════════════════════════════
+    async function uploadBaseline() {
+        if (!baselineFile) return;
+
+        if (baselineFile.size > 10 * 1024 * 1024) {
+            showResultBox('baseline-result', 'error', '⚠ File Too Large', 'Maximum file size is 10 MB for cloud deployment.');
+            return;
+        }
+
+        const btn = document.getElementById('btn-set-baseline');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Uploading & Hashing...';
+        showProgress('baseline-progress', true);
+
+        try {
+            const form = new FormData();
+            form.append('file', baselineFile);
+            const res = await fetch('/api/upload_baseline', { method: 'POST', body: form });
+            const d = await res.json();
+
+            if (d.error) {
+                showResultBox('baseline-result', 'error', '❌ Error', d.error);
+            } else {
+                document.getElementById('prev-sha256').textContent = d.sha256;
+                document.getElementById('prev-sha3').textContent = d.sha3_256;
+
+                const msg = d.re_baselined
+                    ? `✅ Baseline UPDATED for <strong>${d.file_name}</strong> (${formatBytes(d.file_size)})`
+                    : `✅ Baseline established for <strong>${d.file_name}</strong> (${formatBytes(d.file_size)})`;
+                showResultBox('baseline-result', 'success', '🛡️ Baseline Stored', msg +
+                    `<br><span class="mono" style="font-size:11px;color:var(--emerald)">SHA-256: ${d.sha256.substring(0,32)}…</span>`);
+
+                setWorkflowStep(3);
+                fetchStats();
+            }
+        } catch(e) {
+            showResultBox('baseline-result', 'error', '❌ Network Error', e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '🛡️ Establish Baseline & Vault';
+            showProgress('baseline-progress', false);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  UPLOAD VERIFY
+    // ═══════════════════════════════════════════════════════
+    async function uploadVerify() {
+        if (!verifyFile) return;
+
+        const btn = document.getElementById('btn-verify-now');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Verifying...';
+        showProgress('verify-progress', true);
+
+        try {
+            const form = new FormData();
+            form.append('file', verifyFile);
+            const res = await fetch('/api/upload_verify', { method: 'POST', body: form });
+            const d = await res.json();
+
+            if (d.error) {
+                showResultBox('verify-result', 'error', '❌ Error', d.error);
+            } else if (d.status === 'CLEAN') {
+                showResultBox('verify-result', 'success', '✅ INTEGRITY VERIFIED',
+                    `<strong>${d.file_name}</strong> — Dual hashes match baseline exactly. No tampering detected.<br>
+                    <span class="mono" style="font-size:11px;color:var(--emerald)">SHA-256: ${d.sha256.substring(0,32)}…</span>`);
+                document.getElementById('verify-diff-section').style.display = 'none';
+                setWorkflowStep(4);
+            } else if (d.status === 'MODIFIED') {
+                showResultBox('verify-result', 'warning', '⚠️ TAMPERING DETECTED',
+                    `<strong>${d.file_name}</strong> — ${d.diff_summary || 'Hashes do not match baseline'}<br>
+                    Risk: <strong style="color:var(--crimson)">${d.risk_level} (${d.risk_score}/100)</strong>`);
+
+                // Show inline diff
+                const diffSection = document.getElementById('verify-diff-section');
+                diffSection.style.display = 'block';
+
+                const diffBox = document.getElementById('verify-diff-box');
+                if (d.raw_diff) {
+                    diffBox.innerHTML = d.raw_diff.split('\n').map(l => {
+                        const safe = l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                        if (l.startsWith('+')) return `<span class="diff-add">${safe}</span>`;
+                        if (l.startsWith('-')) return `<span class="diff-del">${safe}</span>`;
+                        return `<span class="diff-ctx">${safe}</span>`;
+                    }).join('');
                 } else {
-                    wd.textContent = 'IDLE';
-                    wd.style.color = 'var(--text-muted)';
-                    btn.textContent = '▶ Start Real-Time Monitor';
-                    btn.className = 'btn btn-primary';
+                    diffBox.innerHTML = '<span class="diff-ctx">Diff not available for binary file.</span>';
                 }
-            } catch(e) { console.error(e); }
-        }
 
-        async function loadEvents() {
-            try {
-                const res = await fetch('/api/events');
-                const data = await res.json();
-                const tbody = document.getElementById('events-tbody');
-                if(!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No tampering events recorded yet.</td></tr>';
-                    return;
+                // Heuristics
+                const hBox = document.getElementById('verify-heuristics-box');
+                let hHtml = `<div style="margin-bottom:8px"><strong>Risk Level:</strong> <span class="badge badge-${(d.risk_level||'low').toLowerCase()}">${d.risk_level} — ${d.risk_score}/100</span></div>`;
+                if (d.triggered_rules && d.triggered_rules.length > 0) {
+                    hHtml += '<strong>Triggered Security Rules:</strong>';
+                    hHtml += d.triggered_rules.map(r => `
+                        <div style="margin-top:8px;border-left:3px solid var(--crimson);padding-left:10px">
+                            <span style="color:var(--crimson);font-weight:700">${r.rule_name}</span> ${r.line_number ? `(Line ${r.line_number})` : ''} <span class="badge badge-${(r.category||'high').toLowerCase()}">${r.category}</span>
+                            <div style="color:var(--text-muted);font-size:12px;margin-top:2px">${r.description}</div>
+                        </div>`).join('');
+                } else {
+                    hHtml += '<div style="color:var(--text-muted);margin-top:8px">No high-risk heuristic rules triggered.</div>';
                 }
-                tbody.innerHTML = data.map(ev => `
-                    <tr>
-                        <td class="mono">${ev.timestamp.substring(0, 19)}</td>
-                        <td><strong>${ev.file_path.split(/[\\\\/]/).pop()}</strong><br><span class="mono" style="font-size: 10px; color: var(--text-muted);">${ev.file_path}</span></td>
-                        <td><span class="badge badge-modified">${ev.event_type}</span></td>
-                        <td><span class="badge badge-${ev.risk_level.toLowerCase()}">${ev.risk_level} (${ev.risk_score}/100)</span></td>
-                        <td>${ev.diff_summary || '-'}</td>
-                        <td>
-                            ${ev.file_id ? `<button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="inspectDiff(${ev.file_id})">Inspect Diff</button>` : ''}
-                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="generateReport(${ev.id})">Export Report</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) { console.error(e); }
-        }
+                hBox.innerHTML = hHtml;
 
-        async function loadFiles() {
-            try {
-                const res = await fetch('/api/files');
-                const data = await res.json();
-                const tbody = document.getElementById('files-tbody');
-                if(!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No assets registered. Add files in "Protect Asset" tab.</td></tr>';
-                    return;
+                // Report button
+                if (d.event_id) {
+                    currentEventId = d.event_id;
+                    const rBtn = document.getElementById('btn-view-report-inline');
+                    rBtn.style.display = 'inline-flex';
+                    rBtn.onclick = () => viewReport(d.event_id);
                 }
-                tbody.innerHTML = data.map(f => `
-                    <tr>
-                        <td><strong>${f.file_name}</strong></td>
-                        <td class="mono" style="font-size: 11px;">${f.file_path}</td>
-                        <td><span class="badge ${f.status === 'CLEAN' ? 'badge-clean' : 'badge-modified'}">${f.status}</span></td>
-                        <td>${(f.file_size || 0).toLocaleString()} B</td>
-                        <td class="mono">${f.sha256.substring(0, 16)}...</td>
-                        <td>
-                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="verifyFile(${f.id})">Verify</button>
-                            <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;" onclick="inspectDiff(${f.id})">Diff</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) { console.error(e); }
+
+                currentFileId = d.file_id;
+                setWorkflowStep(4);
+                fetchStats();
+                loadEvents();
+            }
+        } catch(e) {
+            showResultBox('verify-result', 'error', '❌ Network Error', e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Verify Integrity Now';
+            showProgress('verify-progress', false);
         }
+    }
 
-        async function toggleMonitor() {
-            await fetch('/api/toggle_monitor', { method: 'POST' });
-            fetchStats();
-        }
+    // ═══════════════════════════════════════════════════════
+    //  DIFF INSPECTION
+    // ═══════════════════════════════════════════════════════
+    async function inspectDiff(fileId) {
+        currentFileId = fileId;
+        // Switch to diff tab
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-diff').classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(b => { if (b.textContent.includes('Change Analysis')) b.classList.add('active'); });
 
-        async function verifyAll() {
-            await fetch('/api/verify_all', { method: 'POST' });
-            fetchStats();
-            loadEvents();
-            alert('Integrity scan completed across all registered assets.');
-        }
-
-        async function verifyFile(fileId) {
-            const res = await fetch('/api/verify/' + fileId, { method: 'POST' });
-            const data = await res.json();
-            alert(`${data.status}: ${data.message}`);
-            fetchStats();
-            loadFiles();
-        }
-
-        async function previewScan() {
-            const path = document.getElementById('scan-path-input').value.trim();
-            if(!path) return alert('Please enter a valid file path.');
-            const res = await fetch('/api/scan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path })
-            });
-            const data = await res.json();
-            if(data.error) return alert(data.error);
-
-            const box = document.getElementById('scan-preview-box');
-            box.style.display = 'block';
-            box.innerHTML = `
-                <div><strong>File:</strong> ${data.file_name} (${data.file_size.toLocaleString()} bytes)</div>
-                <div class="mono" style="margin-top: 4px;"><strong>SHA-256:</strong> ${data.sha256}</div>
-                <div class="mono" style="margin-top: 2px;"><strong>SHA-3-256:</strong> ${data.sha3_256}</div>
-            `;
-        }
-
-        async function baselineFile() {
-            const path = document.getElementById('scan-path-input').value.trim();
-            if(!path) return alert('Please enter a valid file path.');
-            const res = await fetch('/api/baseline', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path })
-            });
-            const data = await res.json();
-            if(data.error) return alert(data.error);
-            alert('Successfully established baseline and stored copy in .fim_vault/!');
-            document.getElementById('scan-path-input').value = '';
-            document.getElementById('scan-preview-box').style.display = 'none';
-            fetchStats();
-        }
-
-        async function inspectDiff(fileId) {
-            currentFileId = fileId;
-            showTab('diff');
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.textContent.includes('Change Analysis')) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-
-            document.getElementById('diff-content-box').textContent = 'Computing granular diff against vault baseline...';
+        document.getElementById('diff-content-box').textContent = '⏳ Computing granular diff against vault baseline...';
+        try {
             const res = await fetch('/api/diff/' + fileId);
-            const data = await res.json();
+            const d = await res.json();
+            if (d.error) {
+                document.getElementById('diff-content-box').textContent = 'Error: ' + d.error;
+                return;
+            }
 
-            document.getElementById('diff-target-title').textContent = 'Tamper Analysis: ' + data.file_name;
+            document.getElementById('diff-target-title').textContent = '📊 Tamper Analysis: ' + d.file_name;
 
-            // Render Diff
             const diffBox = document.getElementById('diff-content-box');
-            if(data.is_identical) {
-                diffBox.innerHTML = '<span class="diff-ctx">File contents match baseline snapshot byte-for-byte. Integrity verified.</span>';
-            } else if(data.raw_diff) {
-                diffBox.innerHTML = data.raw_diff.split('\n').map(l => {
-                    const safe = l.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    if(l.startsWith('+')) return `<span class="diff-add">${safe}</span>`;
-                    if(l.startsWith('-')) return `<span class="diff-del">${safe}</span>`;
+            if (d.is_identical) {
+                diffBox.innerHTML = '<span class="diff-ctx">✅ File contents match baseline byte-for-byte. Integrity verified.</span>';
+            } else if (d.raw_diff) {
+                diffBox.innerHTML = d.raw_diff.split('\n').map(l => {
+                    const safe = l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                    if (l.startsWith('+')) return `<span class="diff-add">${safe}</span>`;
+                    if (l.startsWith('-')) return `<span class="diff-del">${safe}</span>`;
                     return `<span class="diff-ctx">${safe}</span>`;
                 }).join('');
             } else {
-                diffBox.innerHTML = `<span class="diff-ctx">${data.message || 'No diff available.'}</span>`;
+                diffBox.innerHTML = `<span class="diff-ctx">${d.message || 'No diff available. File may be binary or identical.'}</span>`;
             }
 
-            // Render Heuristics
             const hBox = document.getElementById('heuristic-results-box');
-            let hHtml = `<div><strong>Risk Level:</strong> <span class="badge badge-${data.risk_level.toLowerCase()}">${data.risk_level} (Score: ${data.risk_score}/100)</span></div>`;
-            if(data.triggered_rules && data.triggered_rules.length > 0) {
-                hHtml += '<div style="margin-top: 10px;"><strong>Triggered Security Rules:</strong></div>';
-                hHtml += data.triggered_rules.map(r => `
-                    <div style="margin-top: 6px; border-left: 2px solid var(--crimson); padding-left: 8px;">
-                        <span style="color: var(--crimson); font-weight: 700;">${r.rule_name}</span> ${r.line_number ? `(Line ${r.line_number})` : ''}
-                        <div style="color: var(--text-muted); font-size: 11px;">${r.description}</div>
-                    </div>
-                `).join('');
+            let hHtml = `<div><strong>Risk Level:</strong> <span class="badge badge-${(d.risk_level||'low').toLowerCase()}">${d.risk_level} (${d.risk_score}/100)</span></div>`;
+            if (d.triggered_rules && d.triggered_rules.length > 0) {
+                hHtml += '<div style="margin-top:10px"><strong>Triggered Security Rules:</strong></div>';
+                hHtml += d.triggered_rules.map(r => `
+                    <div style="margin-top:8px;border-left:3px solid var(--crimson);padding-left:10px">
+                        <span style="color:var(--crimson);font-weight:700">${r.rule_name}</span> ${r.line_number ? `(Line ${r.line_number})` : ''}
+                        <div style="color:var(--text-muted);font-size:12px;margin-top:2px">${r.description}</div>
+                    </div>`).join('');
             } else {
-                hHtml += '<div style="color: var(--text-muted); margin-top: 8px;">No security heuristic indicators detected.</div>';
+                hHtml += '<div style="color:var(--text-muted);margin-top:8px">No security heuristic indicators triggered.</div>';
             }
             hBox.innerHTML = hHtml;
+
+            document.getElementById('ai-results-box').innerHTML = 'Click <strong>Generate AI Threat Advisory</strong> to triage this incident.';
+        } catch(e) {
+            document.getElementById('diff-content-box').textContent = 'Error: ' + e.message;
         }
+    }
 
-        async function runAiTriage() {
-            if(!currentFileId) return alert('Select an asset to triage first.');
-            const btn = document.getElementById('btn-ai-triage');
-            const aiBox = document.getElementById('ai-results-box');
-            btn.disabled = true;
-            btn.textContent = '⏳ Sanitizing Secrets & Triaging...';
-            aiBox.innerHTML = 'Redacting credentials and generating AI incident response...';
+    // ═══════════════════════════════════════════════════════
+    //  AI TRIAGE
+    // ═══════════════════════════════════════════════════════
+    async function runAiTriage() {
+        if (!currentFileId) { showToast('⚠️', 'Select an asset to triage first.', 'warning'); return; }
+        const btn = document.getElementById('btn-ai-triage');
+        const aiBox = document.getElementById('ai-results-box');
+        const aiStandalone = document.getElementById('ai-standalone-box');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Sanitizing & Triaging...';
+        aiBox.innerHTML = '⏳ Redacting credentials and generating AI incident response...';
 
-            try {
-                const res = await fetch('/api/ai_triage/' + currentFileId, { method: 'POST' });
-                const data = await res.json();
-                btn.disabled = false;
-                btn.textContent = '✨ Generate AI Threat Advisory';
+        try {
+            const res = await fetch('/api/ai_triage/' + currentFileId, { method: 'POST' });
+            const d = await res.json();
+            btn.disabled = false;
+            btn.innerHTML = '✨ Generate AI Threat Advisory';
 
-                aiBox.innerHTML = `
-                    <div style="font-weight: 700; color: var(--cyan); margin-bottom: 6px;">Executive Summary:</div>
-                    <div style="margin-bottom: 10px;">${data.executive_summary}</div>
-                    <div style="font-weight: 700; color: var(--amber); margin-bottom: 6px;">Immediate Remediation Actions:</div>
-                    <ol style="margin-left: 18px;">
-                        ${(data.recommended_actions || []).map(a => `<li>${a}</li>`).join('')}
-                    </ol>
-                    <div style="font-size: 10px; color: var(--text-muted); margin-top: 10px;">Mode: ${data.is_offline ? 'Offline Deterministic Rule Engine' : 'Live Cloud AI'}</div>
-                `;
-            } catch(e) {
-                btn.disabled = false;
-                btn.textContent = '✨ Generate AI Threat Advisory';
-                alert('Error running AI triage: ' + e);
-            }
+            const html = `
+                <div style="font-weight:700;color:var(--cyan);margin-bottom:8px">Executive Threat Summary</div>
+                <div style="margin-bottom:14px;line-height:1.7">${d.executive_summary || 'N/A'}</div>
+                ${d.security_implications && d.security_implications.length ? `
+                <div style="font-weight:700;color:var(--crimson);margin-bottom:6px">Security Implications</div>
+                <ul style="margin:0 0 14px 18px;font-size:13px">${(d.security_implications).map(i=>`<li>${i}</li>`).join('')}</ul>` : ''}
+                <div style="font-weight:700;color:var(--amber);margin-bottom:6px">Immediate Remediation Actions</div>
+                <ol style="margin:0 0 10px 18px;font-size:13px">${(d.recommended_actions||[]).map(a=>`<li>${a}</li>`).join('')}</ol>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Analysis Mode: ${d.is_offline ? '🔒 Offline Deterministic Heuristic Engine' : '🤖 Live AI (Gemini)'}</div>`;
+
+            aiBox.innerHTML = html;
+            if (aiStandalone) aiStandalone.innerHTML = html;
+        } catch(e) {
+            btn.disabled = false;
+            btn.innerHTML = '✨ Generate AI Threat Advisory';
+            aiBox.innerHTML = `<span style="color:var(--crimson)">Error: ${e.message}</span>`;
         }
+    }
 
-        async function loadReports() {
-            try {
-                const res = await fetch('/api/reports');
-                const data = await res.json();
-                const tbody = document.getElementById('reports-tbody');
-                if(!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No reports generated yet. Export one from Dashboard or Events.</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = data.map(r => `
-                    <tr>
-                        <td><strong>${r.file_name}</strong></td>
-                        <td><span class="badge" style="background: rgba(255,255,255,0.1);">${r.format}</span></td>
-                        <td>${r.size}</td>
-                        <td><a href="/reports/${r.file_name}" target="_blank" class="btn btn-outline" style="padding: 4px 10px; font-size: 11px;">🌐 Open in Browser</a></td>
-                    </tr>
-                `).join('');
-            } catch(e) { console.error(e); }
-        }
-
-        async function generateReport(eventId) {
-            const res = await fetch('/api/generate_report/' + eventId, { method: 'POST' });
+    // ═══════════════════════════════════════════════════════
+    //  REPORTS
+    // ═══════════════════════════════════════════════════════
+    async function loadReports() {
+        try {
+            const res = await fetch('/api/reports');
             const data = await res.json();
-            alert('Forensic audit report generated!');
-            window.open('/reports/' + data.filename, '_blank');
-        }
-
-        // Initialize and live auto-poll every 3 seconds
-        fetchStats();
-        loadEvents();
-        setInterval(() => {
-            fetchStats();
-            if(document.getElementById('tab-dashboard').style.display !== 'none') {
-                loadEvents();
+            const tbody = document.getElementById('reports-tbody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No events found. Tamper events automatically generate reports.</td></tr>';
+                return;
             }
-        }, 3000);
+            tbody.innerHTML = data.map(r => {
+                const fname = (r.file_name || '').split(/[/\\]/).pop();
+                const rClass = `badge-${(r.risk_level||'low').toLowerCase()}`;
+                return `
+                <tr>
+                    <td class="mono">#${r.event_id}</td>
+                    <td><strong>${fname}</strong></td>
+                    <td><span class="badge ${rClass}">${r.risk_level}</span></td>
+                    <td class="mono" style="font-size:12px">${(r.timestamp||'').substring(0,19)}</td>
+                    <td style="font-size:13px;color:var(--text-muted)">${r.diff_summary || '—'}</td>
+                    <td>
+                        <button class="btn btn-primary" style="padding:6px 14px;font-size:13px" onclick="viewReport(${r.event_id})">
+                            📑 View Report
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch(e) { console.error('Reports:', e); }
+    }
+
+    function viewReport(eventId) {
+        // Open report inline in new tab — served directly from server, never blank
+        window.open('/api/view_report/' + eventId, '_blank');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  DEMO MODE
+    // ═══════════════════════════════════════════════════════
+    async function seedDemo() {
+        const btn = document.getElementById('btn-seed-demo');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Seeding demo data...';
+        try {
+            const res = await fetch('/api/demo/seed', { method: 'POST' });
+            const d = await res.json();
+            if (d.success) {
+                demoActive = true;
+                document.getElementById('demo-banner').classList.add('active');
+                document.body.classList.add('demo-active');
+                document.getElementById('demo-nav-btn').classList.add('active');
+                showResultBox('demo-result', 'success', '🎭 Demo Mode Active',
+                    `Seeded ${d.seeded.length} sample files. Navigate to Dashboard to see tamper events!`);
+                fetchStats();
+                loadEvents();
+            } else {
+                showResultBox('demo-result', 'error', 'Error', JSON.stringify(d));
+            }
+        } catch(e) {
+            showResultBox('demo-result', 'error', 'Error', e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '🎭 Activate Demo Mode';
+        }
+    }
+
+    async function clearDemo() {
+        const btn = document.getElementById('btn-clear-demo');
+        btn.disabled = true;
+        btn.textContent = 'Clearing...';
+        try {
+            const res = await fetch('/api/demo/clear', { method: 'POST' });
+            const d = await res.json();
+            exitDemo();
+            showResultBox('demo-result', 'success', '✅ Demo Cleared', `Removed ${d.removed} demo file(s).`);
+            fetchStats();
+            loadEvents();
+        } catch(e) {
+            showResultBox('demo-result', 'error', 'Error', e.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🗑️ Clear Demo Data';
+        }
+    }
+
+    function exitDemo() {
+        demoActive = false;
+        document.getElementById('demo-banner').classList.remove('active');
+        document.body.classList.remove('demo-active');
+        document.getElementById('demo-nav-btn').classList.remove('active');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  HELPERS
+    // ═══════════════════════════════════════════════════════
+    function clearBaselineForm() {
+        baselineFile = null;
+        document.getElementById('baseline-file-input').value = '';
+        document.getElementById('baseline-file-info').classList.remove('visible');
+        document.getElementById('baseline-hash-preview').classList.remove('visible');
+        document.getElementById('baseline-result').classList.remove('visible');
+        document.getElementById('btn-set-baseline').disabled = true;
+        setWorkflowStep(1);
+    }
+
+    function clearVerifyForm() {
+        verifyFile = null;
+        document.getElementById('verify-file-input').value = '';
+        document.getElementById('verify-file-info').classList.remove('visible');
+        document.getElementById('verify-result').classList.remove('visible');
+        document.getElementById('verify-diff-section').style.display = 'none';
+        document.getElementById('btn-verify-now').disabled = true;
+    }
+
+    function setWorkflowStep(step) {
+        for (let i = 1; i <= 4; i++) {
+            const el = document.getElementById(`wf-step-${i}`);
+            el.classList.remove('active', 'done');
+            if (i < step) el.classList.add('done');
+            else if (i === step) el.classList.add('active');
+        }
+    }
+
+    function showResultBox(id, type, title, msg) {
+        const box = document.getElementById(id);
+        box.className = `result-box ${type} visible`;
+        box.innerHTML = `<div class="result-title">${title}</div><div>${msg}</div>`;
+    }
+
+    function showProgress(id, show) {
+        const el = document.getElementById(id);
+        el.classList.toggle('visible', show);
+        if (show) {
+            let w = 0;
+            const fill = el.querySelector('.progress-bar-fill');
+            fill.style.width = '0%';
+            const t = setInterval(() => {
+                w = Math.min(w + 8, 85);
+                fill.style.width = w + '%';
+                if (w >= 85) clearInterval(t);
+            }, 200);
+        } else {
+            const fill = el.querySelector('.progress-bar-fill');
+            fill.style.width = '100%';
+            setTimeout(() => { el.classList.remove('visible'); }, 400);
+        }
+    }
+
+    function showToast(title, msg, type) {
+        // Simple non-blocking notification
+        const t = document.createElement('div');
+        t.style.cssText = `position:fixed;bottom:24px;right:24px;background:#151922;border:1px solid ${type==='success'?'#00e676':type==='warning'?'#ffb300':'#3b82f6'};border-radius:10px;padding:14px 20px;max-width:340px;z-index:9999;font-size:14px;box-shadow:0 8px 32px rgba(0,0,0,0.4);`;
+        t.innerHTML = `<strong>${title}</strong><br><span style="color:#8E9CAE">${msg}</span>`;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+    }
+
+    function formatBytes(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+        return (b/(1024*1024)).toFixed(2) + ' MB';
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  INIT
+    // ═══════════════════════════════════════════════════════
+    fetchStats();
+    loadEvents();
+    setInterval(() => {
+        fetchStats();
+        if (document.getElementById('tab-dashboard').classList.contains('active')) {
+            loadEvents();
+        }
+    }, 4000);
     </script>
 </body>
 </html>
