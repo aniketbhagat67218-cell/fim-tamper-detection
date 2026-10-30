@@ -497,9 +497,11 @@ def generate_report_html_string(event_id: int) -> str:
         heuristics_html = "<p style='font-size: 13px; color: #8B949E;'>No high or medium security patterns matched.</p>"
 
     # Diff
-    diff_summary = event["diff_summary"] or ""
+    diff_summary = event.get("diff_summary") or ""
     diff_html = ""
-    if event["file_id"]:
+    raw_diff = event.get("raw_diff")
+
+    if not raw_diff and event.get("file_id"):
         try:
             from core.comparator import compare_file_with_baseline
             from core.vault import get_vault as _get_vault
@@ -507,27 +509,27 @@ def generate_report_html_string(event_id: int) -> str:
             comp = compare_file_with_baseline(
                 file_id=event["file_id"],
                 current_path=event["file_path"],
-                old_sha256=event["old_sha256"] or "",
-                new_sha256=event["new_sha256"] or "",
+                old_sha256=event.get("old_sha256") or "",
+                new_sha256=event.get("new_sha256") or "",
                 vault=_vault
             )
-            if comp.raw_unified_diff:
-                for line in comp.raw_unified_diff.splitlines():
-                    safe = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-                    if safe.startswith("+"):
-                        diff_html += f'<span class="diff-add">{safe}</span>\n'
-                    elif safe.startswith("-"):
-                        diff_html += f'<span class="diff-del">{safe}</span>\n'
-                    else:
-                        diff_html += f'<span class="diff-ctx">{safe}</span>\n'
+            raw_diff = comp.raw_unified_diff
+        except Exception:
+            pass
+
+    if raw_diff:
+        for line in raw_diff.splitlines():
+            safe = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            if safe.startswith("+"):
+                diff_html += f'<span class="diff-add">{safe}</span>\n'
+            elif safe.startswith("-"):
+                diff_html += f'<span class="diff-del">{safe}</span>\n'
             else:
-                diff_html = f'<span class="diff-ctx">{diff_summary or "No diff data available."}</span>'
-        except Exception as e:
-            diff_html = f'<span class="diff-ctx">Diff unavailable: {e}</span>'
+                diff_html += f'<span class="diff-ctx">{safe}</span>\n'
     else:
         diff_html = f'<span class="diff-ctx">{diff_summary or "No diff data stored for this event."}</span>'
 
-    event_color = "#FF5252" if event["event_type"] in ("MODIFIED", "DELETED") else "#00E676"
+    event_color = "#FF5252" if event.get("event_type") in ("MODIFIED", "DELETED") else "#00E676"
 
     return HTML_TEMPLATE.format(
         event_id=event["id"],

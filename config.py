@@ -59,10 +59,27 @@ else:
     except OSError:
         pass
 
+# Persistent Database Settings (Supabase / PostgreSQL with fallback to SQLite)
+DATABASE_URL = (
+    os.environ.get("SUPABASE_DB_URL")
+    or os.environ.get("DATABASE_URL")
+    or os.environ.get("POSTGRES_URL")
+    or ""
+).strip()
+
+# Security & Session Secrets
+SECRET_KEY = os.environ.get("SECRET_KEY", "fim-sentinel-fallback-session-key-849102")
+FIM_ADMIN_PASSWORD = os.environ.get("FIM_ADMIN_PASSWORD", "").strip()
+
+# Integrity Status Constants
+STATUS_UNCHANGED = "UNCHANGED"
+STATUS_MODIFIED = "MODIFIED"
+STATUS_MISSING = "MISSING"
 
 # Performance and Limits
 CHUNK_SIZE = 65536                  # 64 KB single-pass read chunk
 MAX_SNAPSHOT_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB maximum for baseline text snapshots
+MAX_UPLOAD_SIZE_BYTES = 15 * 1024 * 1024    # 15 MB maximum file upload limit
 DEBOUNCE_INTERVAL_SEC = 0.75        # 750 ms debounce delay for Windows atomic writes
 MAX_DIFF_LINES_FOR_AI = 150         # Diff line cutoff to prevent token exhaustion and high latency
 FILE_LOCK_RETRIES = 5               # Retries when encountering WinError 32

@@ -417,6 +417,14 @@
             .stat-value { font-size: 38px; }
             td, th { padding: 16px 18px; font-size: 15px; }
         }
+    
+        /* Smart Board & High Readability Controls */
+        @media screen and (min-width: 1024px) {
+            body { font-size: 15px; }
+            .btn { min-height: 42px; }
+            .btn-lg { min-height: 48px; font-size: 16px; padding: 12px 26px; }
+            .stat-value { font-size: 32px !important; }
+        }
     </style>
 </head>
 <body>
@@ -458,6 +466,18 @@
                 <button class="btn btn-primary" onclick="verifyAll()">⚡ Run Integrity Scan</button>
             </div>
         </header>
+
+                <!-- CLOUD ARCHITECTURE & COMPLIANCE NOTICE -->
+        <div class="architecture-banner" id="arch-banner" style="background:rgba(0,240,255,0.05);border:1px solid rgba(0,240,255,0.2);border-radius:10px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:22px;">🛡️</span>
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:var(--cyan);">Cloud Deployment Architecture Notice</div>
+                    <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">Browser sandbox security prevents web apps from directly polling local workstation disks. In Cloud Mode, file integrity is verified via <strong>Upload &amp; Verify</strong>. For background kernel-level filesystem monitoring, deploy the local FIM Sentinel daemon (<code>python app.py</code>).</div>
+                </div>
+            </div>
+            <span class="badge badge-clean" id="badge-db-engine" style="font-size:11px;padding:6px 14px;letter-spacing:1px;">SQLITE (WAL)</span>
+        </div>
 
         <!-- STATS ROW -->
         <div class="stats-grid">
@@ -610,7 +630,8 @@
                     <div class="diff-box" id="verify-diff-box"></div>
                     <div id="verify-heuristics-box" style="margin-top:14px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;"></div>
                     <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-                        <button class="btn btn-primary" id="btn-view-report-inline" onclick="" style="display:none;">📑 View Full Forensic Report</button>
+                        <button class="btn btn-primary" id="btn-view-report-inline" onclick="" style="display:none;margin-right:8px;">📑 View Full Forensic Report</button>
+                        <button class="btn btn-outline" id="btn-download-report-inline" onclick="" style="display:none;">📥 Download Report HTML</button>
                     </div>
                 </div>
 
@@ -660,7 +681,11 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title" id="diff-target-title">Forensic Diff Inspection</div>
-                    <button class="btn btn-primary" id="btn-ai-triage" onclick="runAiTriage()">✨ Generate AI Threat Advisory</button>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <select id="diff-asset-select" onchange="onDiffAssetSelected()" style="background:var(--bg-card);color:var(--text-main);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;min-width:240px;cursor:pointer;">
+                            <option value="">-- Select Monitored Asset --</option>
+                        </select>
+                        <button class="btn btn-primary" id="btn-ai-triage" onclick="runAiTriage()">✨ Generate AI Threat Advisory</button>
                 </div>
                 <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
                     <div>
@@ -860,6 +885,7 @@
         if (tabName === 'assets')    loadFiles();
         if (tabName === 'audit')     loadEvents(true);
         if (tabName === 'reports')   loadReports();
+        if (tabName === 'diff')      populateDiffAssetSelect();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -873,6 +899,13 @@
             document.getElementById('stat-clean').textContent = d.clean_files;
             document.getElementById('stat-alerts').textContent = (d.modified_files || 0) + (d.missing_files || 0);
 
+            const dbBadge = document.getElementById('badge-db-engine');
+            if (dbBadge && d.is_postgres) {
+                dbBadge.textContent = 'SUPABASE POSTGRESQL';
+                dbBadge.style.color = '#3ecf8e';
+                dbBadge.style.borderColor = '#3ecf8e';
+                dbBadge.style.background = 'rgba(62,207,142,0.15)';
+            }
             const wd = document.getElementById('stat-watchdog');
             const btn = document.getElementById('btn-toggle-monitor');
             if (d.serverless) {
@@ -930,7 +963,7 @@
                     <td><span class="badge ${riskClass}">${ev.risk_level} (${ev.risk_score}/100)</span></td>
                     <td style="font-size:13px">${ev.diff_summary || '—'}</td>
                     <td style="white-space:nowrap">
-                        ${ev.file_id ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="inspectDiff(${ev.file_id})">📊 Inspect Diff</button>` : ''}
+                        ${ev.file_id ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="inspectDiff(${ev.file_id}, ${ev.id})">📊 Inspect Diff</button>` : ''}
                         <button class="btn btn-primary" style="padding:5px 10px;font-size:12px" onclick="viewReport(${ev.id})">📑 Report</button>
                     </td>
                 </tr>`;
@@ -1180,8 +1213,15 @@
                 if (d.event_id) {
                     currentEventId = d.event_id;
                     const rBtn = document.getElementById('btn-view-report-inline');
-                    rBtn.style.display = 'inline-flex';
-                    rBtn.onclick = () => viewReport(d.event_id);
+                    if (rBtn) {
+                        rBtn.style.display = 'inline-flex';
+                        rBtn.onclick = () => viewReport(d.event_id);
+                    }
+                    const dBtn = document.getElementById('btn-download-report-inline');
+                    if (dBtn) {
+                        dBtn.style.display = 'inline-flex';
+                        dBtn.onclick = () => downloadReport(d.event_id);
+                    }
                 }
 
                 currentFileId = d.file_id;
@@ -1201,24 +1241,32 @@
     // ═══════════════════════════════════════════════════════
     //  DIFF INSPECTION
     // ═══════════════════════════════════════════════════════
-    async function inspectDiff(fileId) {
+    async function inspectDiff(fileId, eventId) {
         currentFileId = fileId;
+        currentEventId = eventId || null;
         // Switch to diff tab
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-diff').classList.add('active');
         document.querySelectorAll('.nav-btn').forEach(b => { if (b.textContent.includes('Change Analysis')) b.classList.add('active'); });
 
-        document.getElementById('diff-content-box').textContent = '⏳ Computing granular diff against vault baseline...';
+        // Sync dropdown if fileId present
+        const assetSelect = document.getElementById('diff-asset-select');
+        if (assetSelect && fileId) {
+            assetSelect.value = String(fileId);
+        }
+
+        document.getElementById('diff-content-box').textContent = 'Computing granular diff against vault baseline...';
         try {
-            const res = await fetch('/api/diff/' + fileId);
+            const url = eventId ? ('/api/diff/event/' + eventId) : ('/api/diff/' + fileId);
+            const res = await fetch(url);
             const d = await res.json();
             if (d.error) {
                 document.getElementById('diff-content-box').textContent = 'Error: ' + d.error;
                 return;
             }
 
-            document.getElementById('diff-target-title').textContent = '📊 Tamper Analysis: ' + d.file_name;
+            document.getElementById('diff-target-title').textContent = (eventId ? ('Incident #' + eventId + ' Diff: ') : 'Tamper Analysis: ') + d.file_name;
 
             const diffBox = document.getElementById('diff-content-box');
             if (d.is_identical) {
@@ -1323,7 +1371,37 @@
         } catch(e) { console.error('Reports:', e); }
     }
 
+    
+    function downloadReport(eventId) {
+        window.location.href = '/api/download_report/' + eventId;
+    }
+
+    function promptVerifyAsset(fileName) {
+        showTab('protect');
+        showToast('Verify Asset', 'Please upload \'' + fileName + '\' to verify its integrity.', 'info');
+    }
+
+    async function populateDiffAssetSelect() {
+        try {
+            const res = await fetch('/api/files');
+            const files = await res.json();
+            const sel = document.getElementById('diff-asset-select');
+            if (!sel) return;
+            const current = currentFileId;
+            sel.innerHTML = '<option value="">-- Select Monitored Asset --</option>' +
+                files.map(f => `<option value="${f.id}" ${f.id === current ? 'selected' : ''}>${f.file_name} (${f.status})</option>`).join('');
+        } catch(e) { console.error('Populate assets:', e); }
+    }
+
+    function onDiffAssetSelected() {
+        const sel = document.getElementById('diff-asset-select');
+        if (sel && sel.value) {
+            inspectDiff(parseInt(sel.value, 10));
+        }
+    }
+
     function viewReport(eventId) {
+
         // Open report inline in new tab — served directly from server, never blank
         window.open('/api/view_report/' + eventId, '_blank');
     }

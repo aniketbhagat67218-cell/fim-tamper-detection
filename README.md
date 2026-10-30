@@ -140,7 +140,59 @@ python app.py
 
 ## Running Automated Tests
 
-Execute the test suite to verify cryptographic hashing, snapshot retention, unified diffs, heuristic pattern matching, and secret sanitization:
+Execute the comprehensive test suite to verify cryptographic hashing, snapshot retention, unified diffs, heuristic pattern matching, secret sanitization, and Web APIs:
 ```powershell
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
+
+---
+
+## Web Dashboard & Cloud Deployment (Vercel Serverless)
+
+FIM Sentinel features a dual-mode architecture:
+1. **Local Desktop Endpoint Sentinel (`app.py`)**: Runs on local endpoints with Windows kernel filesystem events (via `watchdog`), 750ms debouncing, and direct desktop UI.
+2. **Cloud Sentinel Web Dashboard (`web_app.py`)**: Deployed on **Vercel** serverless functions (`api/index.py`), supporting browser-based asset baseline protection, re-verification, tamper alerts, unified visual diffing, and forensic report downloads.
+
+### Running the Web Dashboard Locally
+```powershell
+python web_app.py
+```
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in any browser (or Smart Board touchscreen).
+
+### Vercel Deployment Configuration
+
+The repository is configured for zero-config deployment to Vercel via `vercel.json`:
+- **Runtime**: Python 3.11 (`@vercel/python`)
+- **Entrypoint**: `api/index.py` (WSGI app export)
+- **Max Lambda Size**: 15 MB
+- **Driver**: `pg8000` (Pure Python PostgreSQL driver; no native binary compilation required)
+
+### Environment Variables for Vercel / Production
+
+Configure these environment variables in your Vercel Project Settings (**Settings > Environment Variables**):
+
+| Variable Name | Required? | Default / Fallback | Purpose |
+| :--- | :--- | :--- | :--- |
+| `SUPABASE_DB_URL` or `DATABASE_URL` | Optional | SQLite (`fim_database.sqlite3`) | PostgreSQL connection string from Supabase (e.g. `postgresql://postgres:[PASSWORD]@[HOST]:[PORT]/postgres?sslmode=require`). |
+| `SECRET_KEY` | Recommended | Built-in fallback string | Flask session signing key for per-user session isolation. |
+| `GEMINI_API_KEY` | Optional | Offline Heuristic Fallback | Google Gemini API key for AI threat advisory. If omitted, system falls back to offline deterministic heuristics without errors. |
+| `FIM_ADMIN_PASSWORD` | Optional | Empty (Unrestricted) | Administrative lock password for system resets or privileged actions. |
+
+> **Security Note**: All database credentials and API keys are strictly evaluated server-side. No service-role keys or database credentials are ever exposed in client JavaScript or rendered HTML templates.
+
+### Server-Side REST API Reference
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/upload_baseline` | `POST` | Upload file (`file` form field). Computes SHA-256 + SHA-3-256 dual hashes, vaults baseline snapshot in database & disk, returns `UNCHANGED`. |
+| `/api/upload_verify` | `POST` | Upload file for tamper verification. Compares dual hashes against baseline. Returns `UNCHANGED` (no alert) or `MODIFIED` (with diff and heuristic score). Suppresses duplicate alerts on re-verification. |
+| `/api/events` | `GET` | Returns audit history list with optional `risk`, `search`, and `include_demo` filters. |
+| `/api/files` | `GET` | Returns inventory of active monitored assets and their baseline hashes. |
+| `/api/diff/<file_id>` | `GET` | Returns diff delta, line changes, and risk rules for an asset. Binary assets return structured size and metadata deltas. |
+| `/api/diff/event/<event_id>` | `GET` | Returns exact diff and triggered heuristics for a specific audit event. |
+| `/api/download_report/<event_id>` | `GET` | Downloads printable HTML forensic audit report as an attachment. |
+| `/api/view_report/<event_id>` | `GET` | Renders the forensic report directly in the browser. |
+| `/api/demo/seed` | `POST` | Seeds 3 realistic attack scenarios (`auth_policy.py`, `server_config.ini`, `system_manifest.json`) for presentation and testing. |
+| `/api/demo/clear` | `POST` | Purges only demo records while strictly preserving real user baseline assets. |
+| `/api/agent_info` | `GET` | Architectural disclosure distinguishing browser sandbox upload verification from local background daemon monitoring. |
+

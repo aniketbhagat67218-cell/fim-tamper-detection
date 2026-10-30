@@ -265,6 +265,10 @@ class FileIntegrityMonitor:
             # Metadata-only touch or false event; content is intact. Discard silently!
             return
 
+        # Check for duplicate tampering events (already alerted on this exact modified hash)
+        if hasattr(self.db, "check_duplicate_tamper") and self.db.check_duplicate_tamper(file_id, hash_res.sha256):
+            return
+
         # 4. Hash mismatch confirmed -> Tampering Detected!
         logger.warning(f"Integrity violation detected on {file_path}!")
 
@@ -300,6 +304,14 @@ class FileIntegrityMonitor:
         ]
 
         diff_summary = f"+{comp.added_count} / -{comp.deleted_count} lines" if not comp.is_binary else f"Binary size delta: {comp.size_delta:+d} bytes"
+        if comp.is_binary:
+            raw_diff = (
+                f"--- [Baseline Binary: {p.name} (Size: {baseline_size} B, SHA-256: {baseline_sha256[:24]}...)]\n"
+                f"+++ [Current Binary: {p.name} (Size: {hash_res.file_size} B, SHA-256: {hash_res.sha256[:24]}...)]\n"
+                f"[Binary File Detected: Raw text diff suppressed to prevent display corruption. Size delta: {comp.size_delta:+d} bytes.]"
+            )
+        else:
+            raw_diff = comp.raw_unified_diff
 
         event_id = self.db.log_event(
             file_id=file_id,
@@ -312,7 +324,8 @@ class FileIntegrityMonitor:
             risk_level=risk.risk_level,
             risk_score=risk.overall_score,
             detected_heuristics=heuristics_data,
-            diff_summary=diff_summary
+            diff_summary=diff_summary,
+            raw_diff=raw_diff
         )
 
         # 9. Push to GUI Queue for smooth, thread-safe UI update
@@ -377,6 +390,15 @@ class FileIntegrityMonitor:
                 for t in risk.triggered_rules
             ]
             diff_summary = f"+{comp.added_count} / -{comp.deleted_count} lines" if not comp.is_binary else f"Binary size delta: {comp.size_delta:+d} bytes"
+            if comp.is_binary:
+                raw_diff = (
+                    f"--- [Baseline Binary: {p.name} (Size: {rec['file_size']} B, SHA-256: {rec['sha256'][:24]}...)]\n"
+                    f"+++ [Current Binary: {p.name} (Size: {res.file_size} B, SHA-256: {res.sha256[:24]}...)]\n"
+                    f"[Binary File Detected: Raw text diff suppressed to prevent display corruption. Size delta: {comp.size_delta:+d} bytes.]"
+                )
+            else:
+                raw_diff = comp.raw_unified_diff
+
             event_id = self.db.log_event(
                 file_id=file_id,
                 file_path=file_path,
@@ -388,7 +410,8 @@ class FileIntegrityMonitor:
                 risk_level=risk.risk_level,
                 risk_score=risk.overall_score,
                 detected_heuristics=heuristics_data,
-                diff_summary=diff_summary
+                diff_summary=diff_summary,
+                raw_diff=raw_diff
             )
             return {
                 "status": "MODIFIED",
