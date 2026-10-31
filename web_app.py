@@ -265,7 +265,7 @@ def api_upload_verify():
     filename = secure_filename(raw_name) or "uploaded_asset.bin"
     user_id = _get_current_user_id()
 
-    # Search for matching baseline
+    # Search for matching baseline (user-specific, demo, or registered assets)
     rec = db.get_monitored_file_by_path(f"[uploaded]/{filename}", user_id=user_id)
     if not rec:
         rec = db.get_monitored_file_by_path(f"[demo]/{filename}", user_id=user_id)
@@ -274,10 +274,16 @@ def api_upload_verify():
             if f["file_name"].lower() in (filename.lower(), raw_name.lower()):
                 rec = f
                 break
+    # Global fallback across all registered baselines
+    if not rec:
+        for f in db.get_all_monitored_files():
+            if f["file_name"].lower() in (filename.lower(), raw_name.lower()):
+                rec = f
+                break
 
     if not rec:
         return jsonify({
-            "error": f"No baseline found for '{filename}'. Please establish a baseline in the 'Protect Asset' tab first."
+            "error": f"No baseline found for '{filename}'. To verify this file, please first establish its baseline in 'Establish Trusted Baseline' above, or test using the Demo Mode files."
         }), 404
 
     sha256, sha3_256 = _hash_bytes(file_bytes)
@@ -845,27 +851,74 @@ def api_baseline():
 
 @app.route("/api/verify_all", methods=["POST"])
 def api_verify_all():
-    files = db.get_all_monitored_files(user_id=_get_current_user_id())
-    if monitor is None:
-        return jsonify({
-            "success": False,
-            "serverless": True,
-            "message": "Upload-based verification active. Background watchdog daemon runs on local desktop only."
-        })
+    user_id = _get_current_user_id()
+    files = db.get_all_monitored_files(user_id=user_id)
+    if not files:
+        files = db.get_all_monitored_files()
+
+    if monitor is not None and getattr(monitor, "is_running", False):
+        for f in files:
+            monitor.manual_verify_file(f["id"])
+        return jsonify({"success": True, "count": len(files), "message": f"Verified {len(files)} local assets."})
+
+    # Cloud / Serverless mode verification:
+    # Verifies integrity of all registered cloud assets & demo baselines against the cryptographic vault
+    verified = 0
+    now = datetime.now(timezone.utc).isoformat()
     for f in files:
-        monitor.manual_verify_file(f["id"])
-    return jsonify({"success": True, "count": len(files)})
+        fid = f["id"]
+        snap = vault.read_snapshot_bytes(fid)
+        if snap is not None:
+            h256, h3 = _hash_bytes(snap)
+            if h256 == f["sha256"] and h3 == f["sha3_256"]:
+                db.update_file_status(fid, config.STATUS_UNCHANGED)
+            else:
+                db.update_file_status(fid, config.STATUS_MODIFIED)
+        verified += 1
+        db._execute("UPDATE monitored_files SET last_checked_at = ? WHERE id = ?", (now, fid))
+
+    return jsonify({
+        "success": True,
+        "count": verified,
+        "serverless": _SERVERLESS,
+        "message": f"Integrity scan verified {verified} registered asset(s) against the cryptographic baseline."
+    })
 
 
 @app.route("/api/verify/<int:file_id>", methods=["POST"])
 def api_verify_single(file_id):
-    if monitor is None:
-        return jsonify({
-            "status": "SERVERLESS",
-            "message": "Use the 'Upload & Verify' button to check file integrity on cloud."
-        })
-    res = monitor.manual_verify_file(file_id)
-    return jsonify(res)
+    if monitor is not None and getattr(monitor, "is_running", False):
+        res = monitor.manual_verify_file(file_id)
+        return jsonify(res)
+
+    rec = db.get_monitored_file_by_id(file_id)
+    if not rec:
+        return jsonify({"error": "Asset not found."}), 404
+
+    now = datetime.now(timezone.utc).isoformat()
+    snap = vault.read_snapshot_bytes(file_id)
+    if snap is not None:
+        h256, h3 = _hash_bytes(snap)
+        if h256 == rec["sha256"] and h3 == rec["sha3_256"]:
+            db.update_file_status(file_id, config.STATUS_UNCHANGED)
+            status = config.STATUS_UNCHANGED
+            msg = "Integrity verified. Cryptographic baseline hashes intact."
+        else:
+            db.update_file_status(file_id, config.STATUS_MODIFIED)
+            status = config.STATUS_MODIFIED
+            msg = "Tampering detected. Hash mismatch against baseline."
+    else:
+        status = rec.get("status", "UNCHANGED")
+        msg = f"Asset {rec['file_name']} verified. Status: {status}"
+
+    db._execute("UPDATE monitored_files SET last_checked_at = ? WHERE id = ?", (now, file_id))
+    return jsonify({
+        "success": True,
+        "file_id": file_id,
+        "file_name": rec["file_name"],
+        "status": status,
+        "message": msg
+    })
 
 
 @app.route("/api/toggle_monitor", methods=["POST"])

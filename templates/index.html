@@ -686,6 +686,7 @@
                             <option value="">-- Select Monitored Asset --</option>
                         </select>
                         <button class="btn btn-primary" id="btn-ai-triage" onclick="runAiTriage()">✨ Generate AI Threat Advisory</button>
+                    </div>
                 </div>
                 <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
                     <div>
@@ -740,8 +741,14 @@
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">✨ AI Security Analysis</div>
-                        <div class="card-sub">Privacy-preserving AI triage — credentials redacted locally before any API call</div>
+                        <div class="card-title">? AI Security Analysis</div>
+                        <div class="card-sub">Privacy-preserving threat advisory via Google Gemini &amp; heuristic triage</div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <select id="ai-asset-select" onchange="runStandaloneAiTriage()" style="background:var(--bg-card);color:var(--text-main);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;min-width:260px;cursor:pointer;">
+                            <option value="">-- Choose Asset to Triage --</option>
+                        </select>
+                        <button class="btn btn-primary" id="btn-run-standalone-ai" onclick="runStandaloneAiTriage()">? Run AI Threat Advisory</button>
                     </div>
                 </div>
                 <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px;">
@@ -886,6 +893,8 @@
         if (tabName === 'audit')     loadEvents(true);
         if (tabName === 'reports')   loadReports();
         if (tabName === 'diff')      populateDiffAssetSelect();
+
+        if (tabName === 'ai')        populateAiAssetSelect();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -987,7 +996,7 @@
                 const isDemo = f.file_path && f.file_path.startsWith('[demo]');
                 const isUpload = f.file_path && f.file_path.startsWith('[uploaded]');
                 const source = isDemo ? '<span class="badge badge-demo">DEMO</span>' : (isUpload ? '<span class="badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3)">UPLOADED</span>' : '<span class="badge badge-clean">LOCAL</span>');
-                const statusClass = f.status === 'CLEAN' ? 'badge-clean' : (f.status === 'MISSING' ? 'badge-missing' : 'badge-modified');
+                const statusClass = (f.status === 'CLEAN' || f.status === 'UNCHANGED') ? 'badge-clean' : (f.status === 'MISSING' ? 'badge-missing' : 'badge-modified');
                 const added = (f.created_at || '').substring(0,10);
                 return `
                 <tr>
@@ -1015,15 +1024,17 @@
     }
 
     async function verifyAll() {
-        const res = await fetch('/api/verify_all', { method: 'POST' });
-        const d = await res.json();
-        if (d.serverless) {
-            showToast('☁ Cloud Mode', 'Use the Upload & Verify button to check individual files.', 'info');
-        } else {
-            showToast('✅ Scan Complete', `Scanned ${d.count || 0} assets.`, 'success');
+        showToast('? Verifying', 'Scanning all assets against baseline vault...', 'info');
+        try {
+            const res = await fetch('/api/verify_all', { method: 'POST' });
+            const d = await res.json();
+            showToast('? Scan Complete', d.message || `Scanned ${d.count || 0} registered assets.`, 'success');
+            fetchStats();
+            loadEvents();
+            loadFiles();
+        } catch(e) {
+            showToast('Error', 'Verification scan request failed.', 'error');
         }
-        fetchStats();
-        loadEvents();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1167,7 +1178,7 @@
 
             if (d.error) {
                 showResultBox('verify-result', 'error', '❌ Error', d.error);
-            } else if (d.status === 'CLEAN') {
+            } else if (d.status === 'CLEAN' || d.status === 'UNCHANGED') {
                 showResultBox('verify-result', 'success', '✅ INTEGRITY VERIFIED',
                     `<strong>${d.file_name}</strong> — Dual hashes match baseline exactly. No tampering detected.<br>
                     <span class="mono" style="font-size:11px;color:var(--emerald)">SHA-256: ${d.sha256.substring(0,32)}…</span>`);
@@ -1305,6 +1316,171 @@
     // ═══════════════════════════════════════════════════════
     //  AI TRIAGE
     // ═══════════════════════════════════════════════════════
+    
+
+    async function populateAiAssetSelect() {
+
+        try {
+
+            const res = await fetch('/api/files');
+
+            const files = await res.json();
+
+            const sel = document.getElementById('ai-asset-select');
+
+            if (!sel) return;
+
+            sel.innerHTML = '<option value="">-- Choose Asset to Triage --</option>';
+
+            files.forEach(f => {
+
+                const opt = document.createElement('option');
+
+                opt.value = f.id;
+
+                opt.textContent = `${f.file_name} (${f.status})`;
+
+                sel.appendChild(opt);
+
+            });
+
+            if (currentFileId && sel.querySelector(`option[value="${currentFileId}"]`)) {
+                sel.value = String(currentFileId);
+                runStandaloneAiTriage();
+            } else if (files.length > 0) {
+                const target = files.find(f => f.status === 'MODIFIED') || files[0];
+                sel.value = String(target.id);
+                runStandaloneAiTriage();
+            }
+
+        } catch(e) { console.error('Populate AI assets:', e); }
+
+    }
+
+
+
+    async function runStandaloneAiTriage() {
+
+        const sel = document.getElementById('ai-asset-select');
+
+        const fileId = sel ? sel.value : currentFileId;
+
+        if (!fileId) {
+
+            showToast('Select Asset', 'Please select an asset to triage.', 'warning');
+
+            return;
+
+        }
+
+        const btn = document.getElementById('btn-run-standalone-ai');
+
+        const box = document.getElementById('ai-standalone-box');
+
+        if (btn) {
+
+            btn.disabled = true;
+
+            btn.innerHTML = '<span class="spinner"></span> Analyzing Threat Vectors...';
+
+        }
+
+        box.innerHTML = '? Sanitizing diff content and executing AI threat triage...';
+
+
+
+        try {
+
+            const res = await fetch('/api/ai_triage/' + fileId, { method: 'POST' });
+
+            const d = await res.json();
+
+            if (d.error) {
+
+                box.innerHTML = `<span style="color:var(--crimson)">Error: ${d.error}</span>`;
+
+                return;
+
+            }
+
+
+
+            let html = `
+
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,240,255,0.2);padding-bottom:12px;margin-bottom:16px;">
+
+                    <div style="font-weight:800;color:var(--cyan);font-size:16px;">Executive Threat Summary</div>
+
+                    <span class="badge ${d.is_offline ? 'badge-low' : 'badge-clean'}">${d.is_offline ? 'OFFLINE HEURISTICS' : 'LIVE GEMINI AI'}</span>
+
+                </div>
+
+                <div style="font-size:15px;line-height:1.7;margin-bottom:20px;">${d.executive_summary || 'No threat summary available.'}</div>
+
+            `;
+
+
+
+            if (d.security_implications && d.security_implications.length > 0) {
+
+                html += `
+
+                    <div style="font-weight:700;color:var(--crimson);font-size:14px;margin-bottom:8px;">?? Security Implications & Potential Vulnerabilities</div>
+
+                    <ul style="margin:0 0 20px 22px;line-height:1.8;">
+
+                        ${d.security_implications.map(i => `<li>${i}</li>`).join('')}
+
+                    </ul>
+
+                `;
+
+            }
+
+
+
+            if (d.recommended_actions && d.recommended_actions.length > 0) {
+
+                html += `
+
+                    <div style="font-weight:700;color:var(--emerald);font-size:14px;margin-bottom:8px;">??? Immediate Remediation Actions</div>
+
+                    <ul style="margin:0 0 16px 22px;line-height:1.8;">
+
+                        ${d.recommended_actions.map(a => `<li>${a}</li>`).join('')}
+
+                    </ul>
+
+                `;
+
+            }
+
+
+
+            html += `<div style="font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:12px;margin-top:14px;">?? Privacy Guarantee: Credentials, bearer tokens, and secrets were stripped prior to analysis.</div>`;
+
+            box.innerHTML = html;
+
+        } catch(e) {
+
+            box.innerHTML = `<span style="color:var(--crimson)">Triage error: ${e.message}</span>`;
+
+        } finally {
+
+            if (btn) {
+
+                btn.disabled = false;
+
+                btn.innerHTML = '? Run AI Threat Advisory';
+
+            }
+
+        }
+
+    }
+
+
+
     async function runAiTriage() {
         if (!currentFileId) { showToast('⚠️', 'Select an asset to triage first.', 'warning'); return; }
         const btn = document.getElementById('btn-ai-triage');
@@ -1390,6 +1566,11 @@
             const current = currentFileId;
             sel.innerHTML = '<option value="">-- Select Monitored Asset --</option>' +
                 files.map(f => `<option value="${f.id}" ${f.id === current ? 'selected' : ''}>${f.file_name} (${f.status})</option>`).join('');
+            if (!currentFileId && files.length > 0) {
+                const target = files.find(f => f.status === 'MODIFIED') || files[0];
+                sel.value = String(target.id);
+                inspectDiff(target.id);
+            }
         } catch(e) { console.error('Populate assets:', e); }
     }
 

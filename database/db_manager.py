@@ -414,7 +414,7 @@ class DBManager:
         query = "SELECT * FROM monitored_files WHERE 1=1"
         params = []
         if user_id:
-            query += " AND (user_id = ? OR user_id = 'default_user')"
+            query += " AND (user_id = ? OR user_id = 'default_user' OR is_demo = 1)"
             params.append(user_id)
         if not include_demo:
             query += " AND is_demo = 0"
@@ -557,7 +557,7 @@ class DBManager:
         params: List[Any] = []
 
         if user_id:
-            query += " AND (user_id = ? OR user_id = 'default_user')"
+            query += " AND (user_id = ? OR user_id = 'default_user' OR is_demo = 1)"
             params.append(user_id)
 
         if not include_demo:
@@ -622,7 +622,7 @@ class DBManager:
         query = "SELECT * FROM report_metadata WHERE 1=1"
         params = []
         if user_id:
-            query += " AND (user_id = ? OR user_id = 'default_user')"
+            query += " AND (user_id = ? OR user_id = 'default_user' OR is_demo = 1)"
             params.append(user_id)
         query += " ORDER BY id DESC LIMIT 100"
         return self._execute(query, tuple(params))
@@ -632,7 +632,7 @@ class DBManager:
     # ---------------------------------------------------------------------------
 
     def get_system_stats(self, user_id: Optional[str] = None) -> Dict[str, Any]:
-        user_filter = " WHERE (user_id = ? OR user_id = 'default_user')" if user_id else ""
+        user_filter = " WHERE (user_id = ? OR user_id = 'default_user' OR is_demo = 1)" if user_id else ""
         user_param = (user_id,) if user_id else ()
 
         files = self._execute(f"SELECT status, COUNT(*) as cnt FROM monitored_files{user_filter} GROUP BY status", user_param)
