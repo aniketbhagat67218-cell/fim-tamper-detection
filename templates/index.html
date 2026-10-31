@@ -518,6 +518,10 @@
             cursor: pointer;
             width: 100%;
             height: 100%;
+            z-index: 10;
+        }
+        .upload-zone > div, .upload-zone > span {
+            pointer-events: none;
         }
         .upload-icon {
             font-size: 44px;
@@ -773,6 +777,209 @@
             .stats-grid { grid-template-columns: 1fr; }
             h1 { font-size: 20px; }
         }
+    
+        /* === SOC CYBERSECURITY DESIGN EXTENSIONS === */
+        .header-hero {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-hero-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(0,240,255,0.18), rgba(0,240,255,0.03));
+            border: 1px solid rgba(0,240,255,0.3);
+            box-shadow: 0 0 20px rgba(0,240,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyan);
+            flex-shrink: 0;
+        }
+        .header-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .cloud-mode-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .cloud-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+            display: inline-block;
+        }
+        .user-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px 5px 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .user-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00F0FF, #3B82F6);
+            color: #070B14;
+            font-weight: 800;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Sparklines & stat trends */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-sparkline {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 120px;
+            height: 48px;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .stat-trend.cyan { color: var(--cyan); }
+        .stat-trend.emerald { color: var(--emerald); }
+        .stat-trend.crimson { color: var(--crimson); }
+        .stat-trend.blue { color: var(--blue); }
+
+        /* Dashboard Middle Row */
+        .dashboard-mid-grid {
+            display: grid;
+            grid-template-columns: 38% calc(62% - 20px);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 1100px) {
+            .dashboard-mid-grid { grid-template-columns: 1fr; }
+        }
+
+        .system-overview-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .overview-body {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 10px 0;
+        }
+        @media (max-width: 600px) {
+            .overview-body { flex-direction: column; text-align: center; }
+        }
+        .overview-radial-wrap {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .overview-radial-svg {
+            transform: rotate(-90deg);
+            width: 130px;
+            height: 130px;
+        }
+        .overview-center-icon {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .overview-stats-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .overview-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .overview-stat-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+        .overview-stat-val {
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: #FFF;
+        }
+
+        /* Sidebar Footer Status Box */
+        .sidebar-status-box {
+            margin-top: auto;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sidebar-status-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(16, 185, 129, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--emerald);
+            flex-shrink: 0;
+        }
+        .sidebar-version-tag {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
     </style>
 </head>
 <body>
@@ -788,26 +995,26 @@
         <div class="brand">
             <div class="brand-header">
                 <div class="brand-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect width="8" height="6" x="8" y="11" rx="1"/><path d="M10 11V9a2 2 0 1 1 4 0v2"/></svg>
                 </div>
                 <div>
-                    <div class="brand-badge">FIM SENTINEL</div>
-                    <div class="brand-title">SOC Console</div>
+                    <div class="brand-badge" style="letter-spacing:1.5px;color:var(--cyan)">FIM SENTINEL</div>
+                    <div class="brand-title" style="font-size:13px;color:var(--text-main);font-weight:700">Security Operations</div>
                 </div>
             </div>
-            <div class="brand-subtext">Enterprise Cryptographic Monitor</div>
+            <div class="brand-subtext" style="font-size:11px;line-height:1.4;margin-top:4px">File Integrity Monitoring &amp; Tampering Detection</div>
         </div>
         <span class="nav-section">Operations</span>
         <button class="nav-btn active" onclick="showTab('dashboard', this)">
-            <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></span>
+            <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
             <span>Dashboard</span>
         </button>
         <button class="nav-btn" onclick="showTab('protect', this)">
-            <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+            <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/></svg></span>
             <span>Asset Scanner</span>
         </button>
         <button class="nav-btn" onclick="showTab('assets', this)">
-            <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+            <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span>
             <span>Monitored Assets</span>
         </button>
         <span class="nav-section">Analysis</span>
@@ -836,52 +1043,99 @@
             <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg></span>
             <span>Architecture</span>
         </button>
-        <span class="nav-section" style="margin-top: auto;">Presentation</span>
         <button class="nav-btn demo-nav-btn" id="demo-nav-btn" onclick="showTab('demo', this)">
             <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></span>
             <span>Demo Mode</span>
         </button>
+
+        <!-- System Status Box (Matching Reference Image) -->
+        <div class="sidebar-status-box">
+            <div class="sidebar-status-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0.8px;text-transform:uppercase">System Status</div>
+                <div style="font-size:12px;font-weight:700;color:var(--emerald);margin-top:2px;display:flex;align-items:center;gap:6px">
+                    <span>All Systems Operational</span>
+                </div>
+                <svg width="100%" height="16" viewBox="0 0 120 16" fill="none" style="margin-top:4px">
+                    <path d="M0 8 Q 15 2, 30 8 T 60 8 T 90 8 T 120 8" stroke="var(--emerald)" stroke-width="2" fill="none" opacity="0.8"/>
+                </svg>
+            </div>
+        </div>
+        <div class="sidebar-version-tag">FIM Sentinel v1.0.0</div>
     </aside>
 
     <!-- MAIN -->
     <main>
         <header>
-            <div>
-                <h1 id="page-title">SECURITY OPERATIONS DASHBOARD</h1>
-                <p class="subtitle" id="page-sub">Dual-Primitive SHA-256 / SHA-3-256 Cryptographic Baseline & Tamper Detection</p>
-            </div>
-            <div class="header-actions">
-                <button class="btn btn-outline" id="btn-toggle-monitor" onclick="toggleMonitor()">▶ Start Real-Time Monitor</button>
-                <button class="btn btn-primary" onclick="verifyAll()">⚡ Run Integrity Scan</button>
-            </div>
-        </header>
-
-                <!-- CLOUD ARCHITECTURE & COMPLIANCE NOTICE -->
-        <div class="architecture-banner" id="arch-banner" style="background:rgba(0,240,255,0.05);border:1px solid rgba(0,240,255,0.2);border-radius:10px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-            <div style="display:flex;align-items:center;gap:12px;">
-                <span style="font-size:22px;">🛡️</span>
+            <div class="header-hero">
+                <div class="header-hero-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect width="8" height="6" x="8" y="11" rx="1"/><path d="M10 11V9a2 2 0 1 1 4 0v2"/></svg>
+                </div>
                 <div>
-                    <div style="font-size:14px;font-weight:700;color:var(--cyan);">Cloud Deployment Architecture Notice</div>
-                    <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">Browser sandbox security prevents web apps from directly polling local workstation disks. In Cloud Mode, file integrity is verified via <strong>Upload &amp; Verify</strong>. For background kernel-level filesystem monitoring, deploy the local FIM Sentinel daemon (<code>python app.py</code>).</div>
+                    <h1 id="page-title" style="font-size:22px;letter-spacing:-0.4px;margin-bottom:3px">Security Operations Dashboard</h1>
+                    <p class="subtitle" id="page-sub" style="font-size:13px;color:var(--text-muted)">Real-time File Integrity Monitoring &amp; Tampering Detection</p>
                 </div>
             </div>
+            <div class="header-actions-group">
+                <div class="cloud-mode-pill">
+                    <span class="cloud-dot"></span>
+                    <span>Cloud Mode</span>
+                </div>
+                <div class="user-pill">
+                    <div class="user-avatar">A</div>
+                    <span>Aniket</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <button class="btn btn-outline" id="btn-toggle-monitor" onclick="toggleMonitor()" style="display:none">▶ Start Real-Time Monitor</button>
+                <button class="btn btn-primary" onclick="verifyAll()" style="display:flex;align-items:center;gap:6px;box-shadow:0 0 20px rgba(0,240,255,0.25)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <span>Run Integrity Scan</span>
+                </button>
+            </div>
+        </header>
+        <!-- CLOUD ARCHITECTURE & COMPLIANCE NOTICE -->
+        <div class="architecture-banner" id="arch-banner" style="background:rgba(0,240,255,0.03);border:1px solid rgba(0,240,255,0.15);border-radius:10px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <button class="btn btn-outline btn-sm" onclick="showTab('arch')" style="font-size:12px;padding:5px 12px;border-color:rgba(0,240,255,0.3);color:var(--cyan);">View Topology</button>
-                <span class="badge badge-clean" id="badge-db-engine" style="font-size:11px;padding:6px 14px;letter-spacing:1px;">SQLITE (WAL)</span>
+                <span style="font-size:20px;">🛡️</span>
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--cyan);">Cloud Deployment Architecture Notice</div>
+                    <div style="font-size:12px;color:var(--text-muted);">In Cloud Mode, file integrity is verified via <strong>Upload &amp; Verify</strong> or daemon monitor.</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn btn-outline btn-sm" onclick="showTab('arch')" style="font-size:11px;padding:4px 10px;border-color:rgba(0,240,255,0.3);color:var(--cyan);">View Topology</button>
+                <span class="badge badge-clean" id="badge-db-engine" style="font-size:10px;padding:4px 10px;letter-spacing:1px;">SQLITE (WAL)</span>
             </div>
         </div>
 
-        <!-- STATS ROW -->
+        <div id="tab-dashboard" class="tab-pane active">
+
+        <!-- 4 STAT CARDS ROW (WITH SPARKLINES - MATCHING REFERENCE IMAGE) -->
         <div class="stats-grid">
             <div class="stat-card stat-card-cyan">
                 <div class="stat-card-header">
                     <span class="stat-title">Monitored Assets</span>
                     <div class="stat-badge-icon badge-cyan">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </div>
                 </div>
                 <div class="stat-value" id="stat-total" style="color:var(--cyan)">0</div>
-                <div class="stat-sub">Protected in Cryptographic Vault</div>
+                <div class="stat-trend cyan">
+                    <span>↑ +0 today</span>
+                </div>
+                <!-- Subtle Sparkline Chart -->
+                <svg class="stat-sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-cyan" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#00F0FF" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 35 Q 25 32, 45 22 T 80 15 T 100 8 L 100 40 L 0 40 Z" fill="url(#grad-cyan)"/>
+                    <path d="M0 35 Q 25 32, 45 22 T 80 15 T 100 8" fill="none" stroke="#00F0FF" stroke-width="2"/>
+                </svg>
             </div>
 
             <div class="stat-card stat-card-emerald">
@@ -892,7 +1146,20 @@
                     </div>
                 </div>
                 <div class="stat-value" id="stat-clean" style="color:var(--emerald)">0</div>
-                <div class="stat-sub">Dual-hashes match baseline</div>
+                <div class="stat-trend emerald">
+                    <span>↑ 100% verified</span>
+                </div>
+                <!-- Subtle Sparkline Chart -->
+                <svg class="stat-sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-emerald" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#10B981" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 32 Q 30 35, 55 20 T 85 10 T 100 6 L 100 40 L 0 40 Z" fill="url(#grad-emerald)"/>
+                    <path d="M0 32 Q 30 35, 55 20 T 85 10 T 100 6" fill="none" stroke="#10B981" stroke-width="2"/>
+                </svg>
             </div>
 
             <div class="stat-card stat-card-crimson">
@@ -903,49 +1170,204 @@
                     </div>
                 </div>
                 <div class="stat-value" id="stat-alerts" style="color:var(--crimson)">0</div>
-                <div class="stat-sub">Integrity violations flagged</div>
+                <div class="stat-trend crimson">
+                    <span>↑ +1 today</span>
+                </div>
+                <!-- Subtle Sparkline Chart -->
+                <svg class="stat-sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-crimson" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#EF4444" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#EF4444" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 38 Q 20 28, 40 32 T 70 18 T 100 12 L 100 40 L 0 40 Z" fill="url(#grad-crimson)"/>
+                    <path d="M0 38 Q 20 28, 40 32 T 70 18 T 100 12" fill="none" stroke="#EF4444" stroke-width="2"/>
+                </svg>
             </div>
 
             <div class="stat-card stat-card-blue">
                 <div class="stat-card-header">
                     <span class="stat-title">Watchdog Engine</span>
                     <div class="stat-badge-icon badge-blue">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m12 6 4 6-4 6-4-6Z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
                     </div>
                 </div>
-                <div class="stat-value" id="stat-watchdog" style="color:var(--text-muted);font-size:24px">IDLE</div>
-                <div class="stat-sub">Upload-based verification active</div>
+                <div class="stat-value" id="stat-watchdog" style="color:var(--blue);font-size:26px">CLOUD</div>
+                <div class="stat-trend emerald">
+                    <span style="color:var(--emerald)">● Online</span>
+                </div>
+                <!-- Subtle Sparkline Chart -->
+                <svg class="stat-sparkline" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="grad-blue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 34 Q 30 20, 50 30 T 80 14 T 100 8 L 100 40 L 0 40 Z" fill="url(#grad-blue)"/>
+                    <path d="M0 34 Q 30 20, 50 30 T 80 14 T 100 8" fill="none" stroke="#8B5CF6" stroke-width="2"/>
+                </svg>
             </div>
         </div>
 
-        <div id="tab-dashboard" class="tab-pane active">
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Live Forensic Activity Feed</div>
-                        <div class="card-sub">Auto-refreshes every 4 seconds</div>
+        <!-- MIDDLE ROW: SYSTEM OVERVIEW (GAUGE) + ACTIVITY TREND (24H LINE CHART) -->
+        <div class="dashboard-mid-grid">
+            <!-- Left: System Overview Card -->
+            <div class="card system-overview-card" style="margin-bottom:0">
+                <div class="card-header" style="margin-bottom:12px;padding-bottom:10px">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        <span>System Overview</span>
                     </div>
-                    <span style="font-size: 12px; color: var(--emerald);">● Live</span>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Target Asset</th>
-                            <th>Event</th>
-                            <th>Risk Level</th>
-                            <th>Delta</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="events-tbody">
-                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Loading events...</td></tr>
-                    </tbody>
-                </table>
+                <div class="overview-body">
+                    <!-- Radial Status Gauge -->
+                    <div class="overview-radial-wrap">
+                        <svg class="overview-radial-svg" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.06)" stroke-width="8" fill="none"/>
+                            <circle cx="50" cy="50" r="42" stroke="var(--emerald)" stroke-width="8" stroke-dasharray="264" stroke-dashoffset="40" stroke-linecap="round" fill="none"/>
+                        </svg>
+                        <div class="overview-center-icon">
+                            <div style="width:42px;height:42px;border-radius:50%;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);display:flex;align-items:center;justify-content:center;color:var(--emerald);box-shadow:0 0 14px rgba(16,185,129,0.25)">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown List -->
+                    <div class="overview-stats-list">
+                        <div style="margin-bottom:4px">
+                            <div id="overview-status-title" style="color:var(--emerald);font-weight:700;font-size:16px;">All Clear</div>
+                            <div id="overview-status-sub" style="color:var(--text-muted);font-size:12px;">No critical threats detected</div>
+                        </div>
+                        <div class="overview-stat-row">
+                            <span class="overview-stat-label">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
+                                <span>Total Files</span>
+                            </span>
+                            <span class="overview-stat-val" id="overview-total">4</span>
+                        </div>
+                        <div class="overview-stat-row">
+                            <span class="overview-stat-label">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2.5"><path d="m9 12 2 2 4-4"/></svg>
+                                <span>Verified</span>
+                            </span>
+                            <span class="overview-stat-val" id="overview-clean" style="color:var(--emerald)">2</span>
+                        </div>
+                        <div class="overview-stat-row">
+                            <span class="overview-stat-label">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--crimson)" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>
+                                <span>Modified</span>
+                            </span>
+                            <span class="overview-stat-val" id="overview-modified" style="color:var(--crimson)">2</span>
+                        </div>
+                        <div class="overview-stat-row">
+                            <span class="overview-stat-label">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>Last Scan</span>
+                            </span>
+                            <span class="overview-stat-val" id="overview-last-scan" style="font-size:11px;font-family:inherit;color:var(--text-muted)">Oct 31, 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Activity Trend Line Chart -->
+            <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;justify-content:space-between">
+                <div class="card-header" style="margin-bottom:10px;padding-bottom:10px">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                        <span>Activity Trend (Last 24h)</span>
+                    </div>
+                </div>
+                <div style="flex:1;position:relative;min-height:160px;display:flex;align-items:center;">
+                    <svg viewBox="0 0 500 160" style="width:100%;height:100%;overflow:visible;">
+                        <defs>
+                            <linearGradient id="trend-area-grad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.3"/>
+                                <stop offset="100%" stop-color="#00F0FF" stop-opacity="0.0"/>
+                            </linearGradient>
+                            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                            </filter>
+                        </defs>
+                        <!-- Grid Lines -->
+                        <line x1="30" y1="20" x2="490" y2="20" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        <line x1="30" y1="50" x2="490" y2="50" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        <line x1="30" y1="80" x2="490" y2="80" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        <line x1="30" y1="110" x2="490" y2="110" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        <line x1="30" y1="140" x2="490" y2="140" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                        <!-- Y-Axis Labels -->
+                        <text x="18" y="24" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">4</text>
+                        <text x="18" y="54" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">3</text>
+                        <text x="18" y="84" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">2</text>
+                        <text x="18" y="114" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">1</text>
+                        <text x="18" y="144" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">0</text>
+
+                        <!-- Area Fill -->
+                        <path d="M 30 120 L 70 100 L 120 95 L 170 105 L 220 50 L 260 65 L 310 100 L 360 70 L 480 30 L 480 140 L 30 140 Z" fill="url(#trend-area-grad)"/>
+
+                        <!-- Trend Line -->
+                        <path d="M 30 120 L 70 100 L 120 95 L 170 105 L 220 50 L 260 65 L 310 100 L 360 70 L 480 30" fill="none" stroke="#00F0FF" stroke-width="2.5" filter="url(#glow)"/>
+
+                        <!-- Data Nodes -->
+                        <circle cx="30" cy="120" r="3.5" fill="#070B14" stroke="#00F0FF" stroke-width="2"/>
+                        <circle cx="70" cy="100" r="3.5" fill="#070B14" stroke="#00F0FF" stroke-width="2"/>
+                        <circle cx="120" cy="95" r="3.5" fill="#070B14" stroke="#00F0FF" stroke-width="2"/>
+                        <circle cx="170" cy="105" r="3.5" fill="#070B14" stroke="#00F0FF" stroke-width="2"/>
+                        <circle cx="220" cy="50" r="4" fill="#00F0FF" stroke="#FFF" stroke-width="1.5"/>
+                        <circle cx="260" cy="65" r="3.5" fill="#070B14" stroke="#00F0FF" stroke-width="2"/>
+                        <circle cx="310" cy="100" r="3.5" fill="#070B14" stroke="#00F0FF" stroke-width="2"/>
+                        <circle cx="360" cy="70" r="3.5" fill="#070B14" stroke="#00F0FF" stroke-width="2"/>
+                        <circle cx="480" cy="30" r="5" fill="#FFF" stroke="#00F0FF" stroke-width="2.5" filter="url(#glow)"/>
+
+                        <!-- X-Axis Labels -->
+                        <text x="30" y="158" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">12AM</text>
+                        <text x="145" y="158" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">6AM</text>
+                        <text x="260" y="158" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">12PM</text>
+                        <text x="375" y="158" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">6PM</text>
+                        <text x="460" y="158" fill="#64748B" font-size="10" font-family="'JetBrains Mono', monospace">12AM</text>
+                    </svg>
+                </div>
             </div>
         </div>
 
-        <!-- ══════════════════════════════ TAB: PROTECT ASSET ══════════════════════════════ -->
+        <!-- LIVE FORENSIC ACTIVITY FEED TABLE (MATCHING REFERENCE IMAGE) -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>Live Forensic Activity Feed</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:12px;color:var(--emerald);font-weight:600">● Live</span>
+                    <button class="btn btn-outline btn-sm" onclick="showTab('audit')" style="font-size:12px;padding:4px 12px;display:flex;align-items:center;gap:6px">
+                        <span>View All</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>File</th>
+                        <th>Event</th>
+                        <th>Result</th>
+                        <th>Risk Level</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="events-tbody">
+                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Loading events...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
         <div id="tab-protect" class="tab-pane">
 
             <!-- Workflow indicator -->
@@ -978,7 +1400,7 @@
                 </div>
 
                 <!-- Upload Zone -->
-                <div class="upload-zone" id="upload-zone-baseline" ondragover="onDragOver(event,'baseline')" ondragleave="onDragLeave('baseline')" ondrop="onDrop(event,'baseline')">
+                <div class="upload-zone" id="upload-zone-baseline" onclick="document.getElementById('baseline-file-input').click()" ondragover="onDragOver(event,'baseline')" ondragleave="onDragLeave('baseline')" ondrop="onDrop(event,'baseline')">
                     <input type="file" id="baseline-file-input" onchange="onFileSelected('baseline')">
                     <div class="upload-icon">📂</div>
                     <div class="upload-title">Choose File or Drag & Drop</div>
@@ -1024,11 +1446,20 @@
                     </div>
                 </div>
 
-                <div class="upload-zone" id="upload-zone-verify" ondragover="onDragOver(event,'verify')" ondragleave="onDragLeave('verify')" ondrop="onDrop(event,'verify')">
+                <div class="upload-zone" id="upload-zone-verify" onclick="document.getElementById('verify-file-input').click()" ondragover="onDragOver(event,'verify')" ondragleave="onDragLeave('verify')" ondrop="onDrop(event,'verify')">
                     <input type="file" id="verify-file-input" onchange="onFileSelected('verify')">
                     <div class="upload-icon">🔍</div>
                     <div class="upload-title">Upload File to Verify</div>
                     <div class="upload-sub">Upload the same filename that was previously baselined</div>
+                </div>
+
+                
+                <!-- Quick-Select Registered Asset to Verify -->
+                <div style="margin-top:14px;display:flex;align-items:center;gap:10px;background:rgba(0,240,255,0.03);border:1px dashed rgba(0,240,255,0.2);border-radius:8px;padding:12px 16px;flex-wrap:wrap;">
+                    <span style="font-size:12px;font-weight:700;color:var(--cyan);letter-spacing:0.5px;">QUICK-VERIFY:</span>
+                    <select id="quick-verify-select" onchange="onQuickVerifySelect(this.value)" style="background:var(--bg-card);color:var(--text-main);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:13px;flex:1;min-width:240px;cursor:pointer;">
+                        <option value="">-- Or choose an existing monitored file to verify --</option>
+                    </select>
                 </div>
 
                 <div class="file-selected-info" id="verify-file-info">
@@ -1430,6 +1861,7 @@
         }
 
         if (tabName === 'dashboard') loadEvents();
+        if (tabName === 'protect')   populateQuickVerifyDropdown();
         if (tabName === 'assets')    loadFiles();
         if (tabName === 'audit')     loadEvents(true);
         if (tabName === 'reports')   loadReports();
@@ -1442,6 +1874,7 @@
         try {
             const res = await fetch('/api/agent_info');
             const d = await res.json();
+            updateSystemOverview(d);
             const cloudList = document.getElementById('arch-cloud-capabilities');
             const localList = document.getElementById('arch-local-capabilities');
             if (cloudList && d.cloud_capabilities) {
@@ -1460,10 +1893,75 @@
     // ═══════════════════════════════════════════════════════
     //  STATS
     // ═══════════════════════════════════════════════════════
+    
+    // Update SOC System Overview numbers
+    function updateSystemOverview(d) {
+        if (!d) return;
+        const total = d.total_files || 0;
+        const clean = d.clean_files || 0;
+        const modified = d.modified_files || 0;
+        
+        const elTot = document.getElementById('overview-total');
+        const elCln = document.getElementById('overview-clean');
+        const elMod = document.getElementById('overview-modified');
+        const elLsc = document.getElementById('overview-last-scan');
+        const elTitle = document.getElementById('overview-status-title');
+        const elSub = document.getElementById('overview-status-sub');
+        
+        if (elTot) elTot.textContent = total;
+        if (elCln) elCln.textContent = clean;
+        if (elMod) elMod.textContent = modified;
+        if (elLsc) {
+            const now = new Date();
+            elLsc.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+        if (elTitle && elSub) {
+            if (modified > 0) {
+                elTitle.textContent = 'Threats Flagged';
+                elTitle.style.color = 'var(--crimson)';
+                elSub.textContent = `${modified} violation(s) detected in baseline`;
+            } else {
+                elTitle.textContent = 'All Clear';
+                elTitle.style.color = 'var(--emerald)';
+                elSub.textContent = 'No critical threats detected';
+            }
+        }
+    }
+
+    async function populateQuickVerifyDropdown() {
+        try {
+            const res = await fetch('/api/files');
+            const files = await res.json();
+            const sel = document.getElementById('quick-verify-select');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">-- Or choose an existing monitored file to verify --</option>';
+            files.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.file_name;
+                opt.textContent = `${f.file_name} (${f.status})`;
+                sel.appendChild(opt);
+            });
+        } catch(e) {
+            console.error('Failed to populate quick-verify dropdown', e);
+        }
+    }
+
+    function onQuickVerifySelect(fileName) {
+        if (!fileName) return;
+        // Create synthetic File object with same name to test verification
+        const mockFile = new File(["baseline verification check"], fileName, { type: "text/plain" });
+        setVerifyFile(mockFile);
+        document.getElementById('verify-file-name').textContent = '📄 ' + fileName;
+        document.getElementById('verify-file-meta').textContent = 'Selected from registered monitored assets vault';
+        document.getElementById('btn-verify-now').disabled = false;
+        showToast('Asset Selected', `Loaded '${fileName}' for integrity verification. Click 'Verify Integrity Now'.`, 'info');
+    }
+
     async function fetchStats() {
         try {
             const res = await fetch('/api/stats');
             const d = await res.json();
+            updateSystemOverview(d);
             document.getElementById('stat-total').textContent = d.total_files;
             document.getElementById('stat-clean').textContent = d.clean_files;
             document.getElementById('stat-alerts').textContent = (d.modified_files || 0) + (d.missing_files || 0);
@@ -1535,7 +2033,7 @@
                     <td><span class="badge ${riskClass}">${ev.risk_level} (${ev.risk_score}/100)</span></td>
                     <td style="font-size:13px;white-space:nowrap">${ev.diff_summary || '?'}</td>
                     <td style="white-space:nowrap">
-                        ${ev.file_id ? `<button class="btn btn-outline btn-sm" style="padding:5px 10px;font-size:12px;margin-right:4px" onclick="inspectDiff(${ev.file_id}, ${ev.id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg> Diff</button>` : ''}
+                        ${ev.file_id ? `<button class="btn btn-outline btn-sm" style="padding:5px 12px;font-size:12px;margin-right:4px;display:inline-flex;align-items:center;gap:5px;border-color:rgba(0,240,255,0.3);color:var(--cyan)" onclick="inspectDiff(${ev.file_id}, ${ev.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Inspect Diff</button>` : ''}
                         <button class="btn btn-primary btn-sm" style="padding:5px 10px;font-size:12px" onclick="viewReport(${ev.id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Report</button>
                     </td>
                 </tr>`;
@@ -1580,6 +2078,7 @@
     async function toggleMonitor() {
         const res = await fetch('/api/toggle_monitor', { method: 'POST' });
         const d = await res.json();
+            updateSystemOverview(d);
         if (d.serverless) {
             showToast('☁ Cloud Deployment', d.message || 'Real-time monitoring not available. Use Upload & Verify instead.', 'info');
         }
@@ -1591,6 +2090,7 @@
         try {
             const res = await fetch('/api/verify_all', { method: 'POST' });
             const d = await res.json();
+            updateSystemOverview(d);
             showToast('? Scan Complete', d.message || `Scanned ${d.count || 0} registered assets.`, 'success');
             fetchStats();
             loadEvents();
@@ -1697,6 +2197,7 @@
             form.append('file', baselineFile);
             const res = await fetch('/api/upload_baseline', { method: 'POST', body: form });
             const d = await res.json();
+            updateSystemOverview(d);
 
             if (d.error) {
                 showResultBox('baseline-result', 'error', '❌ Error', d.error);
@@ -1738,6 +2239,7 @@
             form.append('file', verifyFile);
             const res = await fetch('/api/upload_verify', { method: 'POST', body: form });
             const d = await res.json();
+            updateSystemOverview(d);
 
             if (d.error) {
                 showResultBox('verify-result', 'error', '❌ Error', d.error);
@@ -1835,6 +2337,7 @@
             const url = eventId ? ('/api/diff/event/' + eventId) : ('/api/diff/' + fileId);
             const res = await fetch(url);
             const d = await res.json();
+            updateSystemOverview(d);
             if (d.error) {
                 document.getElementById('diff-content-box').textContent = 'Error: ' + d.error;
                 return;
@@ -1957,6 +2460,7 @@
             const res = await fetch('/api/ai_triage/' + fileId, { method: 'POST' });
 
             const d = await res.json();
+            updateSystemOverview(d);
 
             if (d.error) {
 
@@ -2056,6 +2560,7 @@
         try {
             const res = await fetch('/api/ai_triage/' + currentFileId, { method: 'POST' });
             const d = await res.json();
+            updateSystemOverview(d);
             btn.disabled = false;
             btn.innerHTML = '✨ Generate AI Threat Advisory';
 
@@ -2161,6 +2666,7 @@
         try {
             const res = await fetch('/api/demo/seed', { method: 'POST' });
             const d = await res.json();
+            updateSystemOverview(d);
             if (d.success) {
                 demoActive = true;
                 document.getElementById('demo-banner').classList.add('active');
@@ -2188,6 +2694,7 @@
         try {
             const res = await fetch('/api/demo/clear', { method: 'POST' });
             const d = await res.json();
+            updateSystemOverview(d);
             exitDemo();
             showResultBox('demo-result', 'success', '✅ Demo Cleared', `Removed ${d.removed} demo file(s).`);
             fetchStats();
