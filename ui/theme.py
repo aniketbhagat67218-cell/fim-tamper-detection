@@ -1,48 +1,48 @@
 """
 Theme configuration for CustomTkinter cybersecurity interface.
-Defines dark slate palette, neon accents, status colors, and typography.
+Defines deep navy & charcoal palette, electric cyan/blue accents, status colors, and typography.
 """
 
 class CyberTheme:
-    # Backgrounds
-    BG_MAIN = "#0D1117"
-    BG_SIDEBAR = "#090D13"
-    BG_CARD = "#161B22"
-    BG_CARD_HOVER = "#1C2128"
-    BG_INPUT = "#0D1117"
-    BG_DIFF = "#06090E"
+    # Deep Navy & Charcoal Backgrounds
+    BG_MAIN = "#0A0E17"
+    BG_SIDEBAR = "#080C14"
+    BG_CARD = "#111827"
+    BG_CARD_HOVER = "#162032"
+    BG_INPUT = "#090D16"
+    BG_DIFF = "#060A11"
 
     # Borders & Dividers
-    BORDER = "#30363D"
-    BORDER_ACCENT = "#388BFD"
+    BORDER = "#1E293B"
+    BORDER_ACCENT = "#3B82F6"
     BORDER_CYAN = "#00F0FF"
 
-    # Neon Accents
+    # Electric Neon & Status Accents
     ACCENT_CYAN = "#00F0FF"
-    ACCENT_EMERALD = "#00E676"
-    ACCENT_AMBER = "#FFB300"
-    ACCENT_CRIMSON = "#FF5252"
-    ACCENT_PURPLE = "#B388FF"
-    ACCENT_BLUE = "#58A6FF"
+    ACCENT_EMERALD = "#10B981"
+    ACCENT_AMBER = "#F59E0B"
+    ACCENT_CRIMSON = "#EF4444"
+    ACCENT_PURPLE = "#A855F7"
+    ACCENT_BLUE = "#3B82F6"
 
     # Status Badges
-    STATUS_CLEAN = "#00E676"
-    STATUS_MODIFIED = "#FF5252"
-    STATUS_MISSING = "#FFB300"
-    STATUS_ERROR = "#FF5252"
+    STATUS_CLEAN = "#10B981"
+    STATUS_MODIFIED = "#EF4444"
+    STATUS_MISSING = "#F59E0B"
+    STATUS_ERROR = "#EF4444"
 
     # Risk Levels
-    RISK_HIGH = "#FF5252"
-    RISK_MEDIUM = "#FFB300"
-    RISK_LOW = "#00E676"
-    RISK_CLEAN = "#58A6FF"
+    RISK_HIGH = "#EF4444"
+    RISK_MEDIUM = "#F59E0B"
+    RISK_LOW = "#10B981"
+    RISK_CLEAN = "#3B82F6"
 
     # Text Colors
-    TEXT_PRIMARY = "#F0F6FC"
-    TEXT_SECONDARY = "#8B949E"
-    TEXT_MUTED = "#6E7681"
-    TEXT_DIFF_ADD = "#7EE787"
-    TEXT_DIFF_DEL = "#FF7B72"
+    TEXT_PRIMARY = "#F1F5F9"
+    TEXT_SECONDARY = "#94A3B8"
+    TEXT_MUTED = "#64748B"
+    TEXT_DIFF_ADD = "#4ADE80"
+    TEXT_DIFF_DEL = "#F87171"
     TEXT_MONO = "#79C0FF"
 
     # Fonts
@@ -63,7 +63,7 @@ class CyberTheme:
     @classmethod
     def get_status_color(cls, status: str) -> str:
         st = (status or "").upper()
-        if st == "CLEAN":
+        if st == "CLEAN" or st == "UNCHANGED":
             return cls.STATUS_CLEAN
         elif st == "MODIFIED":
             return cls.STATUS_MODIFIED
