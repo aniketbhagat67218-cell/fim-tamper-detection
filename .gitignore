@@ -20,6 +20,7 @@ generated_reports/*
 .env.local
 *.key
 *.pem
+alert_config.json
 
 # Editor artifacts
 .vscode/
