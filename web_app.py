@@ -399,6 +399,21 @@ def api_upload_verify():
     except Exception as e:
         logger.warning(f"Report pre-generation notice: {e}")
 
+
+    # Dispatch real-time Telegram / Discord alert
+    try:
+        from alerts import dispatch_tamper_alert
+        dispatch_tamper_alert(
+            file_name=rec["file_name"],
+            event_type="MODIFIED",
+            risk_level=risk.risk_level,
+            risk_score=risk.overall_score,
+            diff_summary=diff_summary,
+            source="FIM Web Console"
+        )
+    except Exception as e:
+        logger.warning(f"Alert dispatch notice: {e}")
+
     return jsonify({
         "status": config.STATUS_MODIFIED,
         "file_name": rec["file_name"],
@@ -941,6 +956,112 @@ def api_toggle_monitor():
 # ---------------------------------------------------------------------------
 def _open_browser():
     webbrowser.open("http://127.0.0.1:5000")
+
+
+
+# ---------------------------------------------------------------------------
+# Real-Time Alert & Smart 1-Click Scan Endpoints
+# ---------------------------------------------------------------------------
+
+@app.route("/api/alerts/config", methods=["GET", "POST"])
+def api_alerts_config():
+    from alerts import get_alert_config, save_alert_config
+    if request.method == "POST":
+        data = request.json or {}
+        saved = save_alert_config(data)
+        return jsonify({"success": True, "config": {
+            "telegram_enabled": bool(saved.get("telegram_enabled")),
+            "telegram_token_set": bool(saved.get("telegram_token")),
+            "telegram_chat_id_set": bool(saved.get("telegram_chat_id")),
+            "discord_enabled": bool(saved.get("discord_enabled")),
+            "discord_webhook_set": bool(saved.get("discord_webhook")),
+        }})
+    cfg = get_alert_config()
+    return jsonify({
+        "telegram_enabled": bool(cfg.get("telegram_enabled")),
+        "telegram_token_set": bool(cfg.get("telegram_token")),
+        "telegram_chat_id_set": bool(cfg.get("telegram_chat_id")),
+        "discord_enabled": bool(cfg.get("discord_enabled")),
+        "discord_webhook_set": bool(cfg.get("discord_webhook")),
+    })
+
+
+@app.route("/api/alerts/test", methods=["POST"])
+def api_alerts_test():
+    from alerts import dispatch_test_alert
+    results = dispatch_test_alert()
+    return jsonify({"success": True, "results": results})
+
+
+@app.route("/api/smart_scan", methods=["POST"])
+def api_smart_scan():
+    """
+    Smart 1-Click Unified Scanner:
+    - If file baseline exists: runs integrity verification and detects tampering.
+    - If file baseline does not exist: automatically establishes baseline and stores snapshot!
+    """
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded. Use form field named 'file'."}), 400
+
+    upload = request.files["file"]
+    if not upload.filename:
+        return jsonify({"error": "Empty filename."}), 400
+
+    file_bytes = upload.read()
+    file_size = len(file_bytes)
+    if file_size == 0:
+        return jsonify({"error": "Uploaded file is empty (0 bytes)."}), 400
+
+    raw_name = Path(upload.filename).name
+    filename = secure_filename(raw_name) or "uploaded_asset.bin"
+    user_id = _get_current_user_id()
+
+    # Search for matching baseline
+    rec = db.get_monitored_file_by_path(f"[uploaded]/{filename}", user_id=user_id)
+    if not rec:
+        rec = db.get_monitored_file_by_path(f"[demo]/{filename}", user_id=user_id)
+    if not rec:
+        for f in db.get_all_monitored_files(user_id=user_id):
+            if f["file_name"].lower() in (filename.lower(), raw_name.lower()):
+                rec = f
+                break
+
+    # If NO baseline found -> Auto-establish baseline!
+    if not rec:
+        sha256, sha3_256 = _hash_bytes(file_bytes)
+        is_binary = b"\x00" in file_bytes[:8192]
+        file_path_label = f"[uploaded]/{filename}"
+        now_iso = datetime.now(timezone.utc).isoformat()
+        file_id = db.add_monitored_file(
+            file_path=file_path_label,
+            file_name=filename,
+            sha256=sha256,
+            sha3_256=sha3_256,
+            file_size=file_size,
+            last_modified=now_iso,
+            is_binary=is_binary,
+            user_id=user_id
+        )
+        vault.store_snapshot_bytes(
+            file_bytes=file_bytes,
+            file_id=file_id,
+            sha256=sha256,
+            file_size=file_size,
+            is_binary=is_binary
+        )
+        return jsonify({
+            "action": "BASELINED",
+            "status": "BASELINED",
+            "file_name": filename,
+            "file_id": file_id,
+            "sha256": sha256,
+            "file_size": file_size,
+            "message": f"New asset registered! Baseline established and locked in cryptographic vault."
+        })
+
+    # If baseline exists -> delegate to verify logic!
+    upload.seek(0)
+    return api_upload_verify()
 
 
 if __name__ == "__main__":

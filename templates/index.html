@@ -1370,6 +1370,35 @@
 
         <div id="tab-protect" class="tab-pane">
 
+            <!-- SMART 1-CLICK UNIFIED SCANNER -->
+            <div class="card" style="border: 1px solid var(--cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.12); margin-bottom: 24px;">
+                <div class="card-header" style="border-bottom: 1px solid rgba(0,240,255,0.2);">
+                    <div>
+                        <div class="card-title" style="color:var(--cyan);font-size:18px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <span>Smart 1-Click Unified Scanner</span>
+                            <span class="badge badge-clean" style="margin-left:8px;font-size:11px;">AUTO-DETECT</span>
+                        </div>
+                        <div class="card-sub">Drop any file — auto-registers if new, auto-verifies SHA-256 integrity if already baselined!</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:12px;color:var(--text-muted);">Engine:</span>
+                        <span class="badge" style="background:rgba(0,240,255,0.1);color:var(--cyan);border:1px solid rgba(0,240,255,0.3)">SHA-256 Single Hash</span>
+                    </div>
+                </div>
+
+                <div class="upload-zone" id="upload-zone-smart" onclick="document.getElementById('smart-file-input').click()" ondragover="onDragOver(event,'smart')" ondragleave="onDragLeave('smart')" ondrop="onDrop(event,'smart')" style="padding:40px 20px;border-color:var(--cyan);background:rgba(0,240,255,0.02)">
+                    <input type="file" id="smart-file-input" onchange="onSmartFileSelected()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:10;">
+                    <div class="upload-icon" style="font-size:36px;margin-bottom:8px;">⚡</div>
+                    <div class="upload-title" style="font-size:17px;font-weight:700;color:#FFF">Drop Any File to Auto-Scan</div>
+                    <div class="upload-sub" style="font-size:13px;color:var(--text-muted);margin-top:4px;">1-Click: Automatically registers baseline or verifies against tampering instantly</div>
+                </div>
+
+                <div class="progress-bar-wrap" id="smart-progress"><div class="progress-bar-fill" style="width:0%"></div></div>
+                <div class="result-box" id="smart-result" style="margin-top:14px;"></div>
+            </div>
+
+
             <!-- Workflow indicator -->
             <div class="workflow-steps">
                 <div class="workflow-step active" id="wf-step-1">
@@ -1416,9 +1445,9 @@
 
                 <!-- Hash preview -->
                 <div class="hash-preview" id="baseline-hash-preview">
-                    <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;letter-spacing:1px;">DUAL-PRIMITIVE CRYPTOGRAPHIC FINGERPRINT</div>
+                    <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;letter-spacing:1px;">CRYPTOGRAPHIC FINGERPRINT (SHA-256)</div>
                     <div class="hash-row"><span class="hash-label">SHA-256</span><span class="hash-value" id="prev-sha256">—</span></div>
-                    <div class="hash-row"><span class="hash-label">SHA-3-256</span><span class="hash-value" id="prev-sha3">—</span></div>
+                    <div class="hash-row" style="display:none"><span class="hash-label">SHA-3-256</span><span class="hash-value" id="prev-sha3">—</span></div>
                     <div class="hash-row"><span class="hash-label">SIZE</span><span class="hash-value" id="prev-size">—</span></div>
                 </div>
 
@@ -1635,6 +1664,53 @@
 
         <!-- ?????????????????????????????? TAB: CONFIGURATION ?????????????????????????????? -->
         <div id="tab-config" class="tab-pane">
+
+            <!-- REAL-TIME MOBILE & DESKTOP ALERTS (TELEGRAM / DISCORD) -->
+            <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 0 25px rgba(16, 185, 129, 0.08); margin-bottom: 24px;">
+                <div class="card-header" style="border-bottom: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div>
+                        <div class="card-title" style="color:var(--emerald)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            <span>Real-Time Alert Dispatcher (Telegram &amp; Discord)</span>
+                        </div>
+                        <div class="card-sub">Receive instant push notifications on your phone whenever tampering is detected by web console or desktop agent</div>
+                    </div>
+                    <span class="badge badge-clean" id="alert-status-badge">STANDBY</span>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:18px;">
+                    <!-- Telegram Settings -->
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:16px;">
+                        <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:#FFF;margin-bottom:10px;">
+                            <span style="font-size:18px">📲</span> Telegram Bot Notification
+                        </div>
+                        <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">Bot Token</label>
+                        <input type="password" id="cfg-tg-token" placeholder="e.g. 123456789:ABCdefGhIjk..." style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text-main);font-size:13px;margin-bottom:12px;">
+
+                        <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">Chat ID</label>
+                        <input type="text" id="cfg-tg-chat" placeholder="e.g. 987654321" style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text-main);font-size:13px;">
+                    </div>
+
+                    <!-- Discord Settings -->
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:16px;">
+                        <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:#FFF;margin-bottom:10px;">
+                            <span style="font-size:18px">💬</span> Discord Channel Webhook
+                        </div>
+                        <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px">Webhook URL</label>
+                        <input type="password" id="cfg-dc-webhook" placeholder="https://discord.com/api/webhooks/..." style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text-main);font-size:13px;margin-bottom:12px;">
+                        <div style="font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:8px">
+                            Paste your Discord server webhook URL to post formatted tamper cards directly into your SOC channel.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-primary" onclick="saveAlertSettings()">💾 Save Alert Settings</button>
+                    <button class="btn btn-outline" id="btn-test-alert" onclick="sendTestAlertNotification()">🔔 Send Test Notification</button>
+                    <span id="alert-save-feedback" style="font-size:13px;color:var(--emerald);margin-left:8px;"></span>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <div>
@@ -1868,6 +1944,7 @@
         if (tabName === 'diff')      populateDiffAssetSelect();
         if (tabName === 'ai')        populateAiAssetSelect();
         if (tabName === 'arch')      loadAgentInfo();
+        if (tabName === 'config')    loadAlertSettings();
     }
 
     async function loadAgentInfo() {
@@ -2044,6 +2121,132 @@
     // ═══════════════════════════════════════════════════════
     //  FILES / ASSETS
     // ═══════════════════════════════════════════════════════
+    
+    // ═══════════════════════════════════════════════════════
+    //  SMART 1-CLICK UNIFIED SCANNER
+    // ═══════════════════════════════════════════════════════
+    async function onSmartFileSelected() {
+        const input = document.getElementById('smart-file-input');
+        const file = input.files[0];
+        if (!file) return;
+
+        showProgress('smart-progress', true);
+        const resBox = document.getElementById('smart-result');
+        resBox.classList.remove('visible');
+
+        try {
+            const form = new FormData();
+            form.append('file', file);
+            const res = await fetch('/api/smart_scan', { method: 'POST', body: form });
+            const d = await res.json();
+
+            if (d.error) {
+                showResultBox('smart-result', 'error', '❌ Scan Error', d.error);
+            } else if (d.action === 'BASELINED') {
+                showResultBox('smart-result', 'success', '🛡️ ASSET BASELINED (1-CLICK)',
+                    `<strong>${d.file_name}</strong> was registered for the first time.<br>
+                    Cryptographic baseline stored in vault.<br>
+                    <span class="mono" style="font-size:11px;color:var(--cyan)">SHA-256: ${d.sha256}</span>`);
+                fetchStats();
+                loadFiles();
+            } else if (d.status === 'CLEAN' || d.status === 'UNCHANGED') {
+                showResultBox('smart-result', 'success', '✅ INTEGRITY VERIFIED (CLEAN)',
+                    `<strong>${d.file_name}</strong> — SHA-256 hash matches baseline perfectly. No tampering detected.<br>
+                    <span class="mono" style="font-size:11px;color:var(--emerald)">SHA-256: ${d.sha256}</span>`);
+                fetchStats();
+            } else if (d.status === 'MODIFIED') {
+                showResultBox('smart-result', 'warning', '🚨 TAMPERING DETECTED!',
+                    `<strong>${d.file_name}</strong> — ${d.diff_summary || 'Cryptographic hash mismatch'}<br>
+                    Risk Level: <strong style="color:var(--crimson)">${d.risk_level} (${d.risk_score}/100)</strong><br>
+                    <span style="font-size:12px;color:var(--emerald)">📲 Real-time notification dispatched to Telegram / Discord!</span>`);
+                fetchStats();
+                loadEvents();
+            }
+        } catch(e) {
+            showResultBox('smart-result', 'error', 'Network Error', e.message);
+        } finally {
+            showProgress('smart-progress', false);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  ALERT CONFIGURATION (TELEGRAM / DISCORD)
+    // ═══════════════════════════════════════════════════════
+    async function loadAlertSettings() {
+        try {
+            const res = await fetch('/api/alerts/config');
+            const d = await res.json();
+            const badge = document.getElementById('alert-status-badge');
+            if (badge) {
+                if (d.telegram_enabled || d.discord_enabled) {
+                    badge.textContent = 'ACTIVE';
+                    badge.className = 'badge badge-clean';
+                } else {
+                    badge.textContent = 'STANDBY';
+                    badge.className = 'badge';
+                }
+            }
+        } catch(e) {
+            console.error('Failed to load alert settings', e);
+        }
+    }
+
+    async function saveAlertSettings() {
+        const tgToken = document.getElementById('cfg-tg-token').value.trim();
+        const tgChat = document.getElementById('cfg-tg-chat').value.trim();
+        const dcWebhook = document.getElementById('cfg-dc-webhook').value.trim();
+        const feedback = document.getElementById('alert-save-feedback');
+
+        try {
+            const payload = {};
+            if (tgToken) payload.telegram_token = tgToken;
+            if (tgChat) payload.telegram_chat_id = tgChat;
+            if (dcWebhook) payload.discord_webhook = dcWebhook;
+
+            const res = await fetch('/api/alerts/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                if (feedback) {
+                    feedback.textContent = '✅ Alert settings saved!';
+                    setTimeout(() => { feedback.textContent = ''; }, 3000);
+                }
+                loadAlertSettings();
+                showToast('Alerts Configured', 'Telegram / Discord settings saved successfully.', 'success');
+            }
+        } catch(e) {
+            showToast('Save Failed', e.message, 'error');
+        }
+    }
+
+    async function sendTestAlertNotification() {
+        const btn = document.getElementById('btn-test-alert');
+        btn.disabled = true;
+        btn.textContent = '⏳ Sending...';
+
+        try {
+            const res = await fetch('/api/alerts/test', { method: 'POST' });
+            const d = await res.json();
+            const tg = d.results ? d.results.telegram : 'none';
+            const dc = d.results ? d.results.discord : 'none';
+
+            if (tg === 'success' || dc === 'success') {
+                showToast('Alert Sent!', `Notification dispatched! (Telegram: ${tg}, Discord: ${dc})`, 'success');
+            } else {
+                showToast('Alert Notice', 'Please enter your Telegram Token & Chat ID or Discord Webhook first.', 'warning');
+            }
+        } catch(e) {
+            showToast('Alert Test Failed', e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🔔 Send Test Notification';
+        }
+    }
+
+
     async function loadFiles() {
         try {
             const res = await fetch('/api/files');
