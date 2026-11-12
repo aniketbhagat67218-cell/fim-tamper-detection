@@ -1370,152 +1370,79 @@
 
         <div id="tab-protect" class="tab-pane">
 
-            <!-- SMART 1-CLICK UNIFIED SCANNER -->
-            <div class="card" style="border: 1px solid var(--cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.12); margin-bottom: 24px;">
+            <!-- SINGLE UNIFIED SHA-256 ASSET SCANNER -->
+            <div class="card" style="border: 1px solid var(--cyan); box-shadow: 0 0 30px rgba(0, 240, 255, 0.12);">
                 <div class="card-header" style="border-bottom: 1px solid rgba(0,240,255,0.2);">
                     <div>
                         <div class="card-title" style="color:var(--cyan);font-size:18px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                            <span>Smart 1-Click Unified Scanner</span>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <span>Asset Scanner &amp; Integrity Verification</span>
                             <span class="badge badge-clean" style="margin-left:8px;font-size:11px;">AUTO-DETECT</span>
                         </div>
-                        <div class="card-sub">Drop any file — auto-registers if new, auto-verifies SHA-256 integrity if already baselined!</div>
+                        <div class="card-sub">Drop any file — if new, its SHA-256 baseline is vaulted. If already registered, its integrity is verified instantly!</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
-                        <span style="font-size:12px;color:var(--text-muted);">Engine:</span>
-                        <span class="badge" style="background:rgba(0,240,255,0.1);color:var(--cyan);border:1px solid rgba(0,240,255,0.3)">SHA-256 Single Hash</span>
+                        <span style="font-size:12px;color:var(--text-muted);">Algorithm:</span>
+                        <span class="badge" style="background:rgba(0,240,255,0.1);color:var(--cyan);border:1px solid rgba(0,240,255,0.3);font-weight:700">SHA-256</span>
                     </div>
                 </div>
 
-                <div class="upload-zone" id="upload-zone-smart" onclick="document.getElementById('smart-file-input').click()" ondragover="onDragOver(event,'smart')" ondragleave="onDragLeave('smart')" ondrop="onDrop(event,'smart')" style="padding:40px 20px;border-color:var(--cyan);background:rgba(0,240,255,0.02)">
+                <!-- Single Upload Drop Zone -->
+                <div class="upload-zone" id="upload-zone-smart" onclick="document.getElementById('smart-file-input').click()" ondragover="onDragOver(event,'smart')" ondragleave="onDragLeave('smart')" ondrop="onDrop(event,'smart')" style="padding:48px 24px;border-color:var(--cyan);background:rgba(0,240,255,0.02)">
                     <input type="file" id="smart-file-input" onchange="onSmartFileSelected()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:10;">
-                    <div class="upload-icon" style="font-size:36px;margin-bottom:8px;">⚡</div>
-                    <div class="upload-title" style="font-size:17px;font-weight:700;color:#FFF">Drop Any File to Auto-Scan</div>
-                    <div class="upload-sub" style="font-size:13px;color:var(--text-muted);margin-top:4px;">1-Click: Automatically registers baseline or verifies against tampering instantly</div>
-                </div>
-
-                <div class="progress-bar-wrap" id="smart-progress"><div class="progress-bar-fill" style="width:0%"></div></div>
-                <div class="result-box" id="smart-result" style="margin-top:14px;"></div>
-            </div>
-
-
-            <!-- Workflow indicator -->
-            <div class="workflow-steps">
-                <div class="workflow-step active" id="wf-step-1">
-                    <div class="step-num">1</div>
-                    <div class="step-label">Choose File</div>
-                </div>
-                <div class="workflow-step" id="wf-step-2">
-                    <div class="step-num">2</div>
-                    <div class="step-label">Preview Hashes</div>
-                </div>
-                <div class="workflow-step" id="wf-step-3">
-                    <div class="step-num">3</div>
-                    <div class="step-label">Set Baseline</div>
-                </div>
-                <div class="workflow-step" id="wf-step-4">
-                    <div class="step-num">4</div>
-                    <div class="step-label">Verify Integrity</div>
-                </div>
-            </div>
-
-            <!-- Step 1 & 2: Choose + Baseline -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">🛡️ Establish Trusted Baseline</div>
-                        <div class="card-sub">Upload any file — dual hashes are computed server-side and stored as your trusted baseline.</div>
-                    </div>
-                </div>
-
-                <!-- Upload Zone -->
-                <div class="upload-zone" id="upload-zone-baseline" onclick="document.getElementById('baseline-file-input').click()" ondragover="onDragOver(event,'baseline')" ondragleave="onDragLeave('baseline')" ondrop="onDrop(event,'baseline')">
-                    <input type="file" id="baseline-file-input" onchange="onFileSelected('baseline')">
-                    <div class="upload-icon">📂</div>
-                    <div class="upload-title">Choose File or Drag & Drop</div>
-                    <div class="upload-sub">Click anywhere in this area to open file browser</div>
-                    <div class="upload-limit">Max 10 MB · Any file type</div>
+                    <div class="upload-icon" style="font-size:42px;margin-bottom:10px;">⚡</div>
+                    <div class="upload-title" style="font-size:18px;font-weight:700;color:#FFF">Drop File Here or Click to Browse</div>
+                    <div class="upload-sub" style="font-size:13px;color:var(--text-muted);margin-top:6px;">Single-Action Scanner: Auto-detects whether to establish baseline or verify against tampering</div>
+                    <div class="upload-limit" style="margin-top:8px;font-size:12px;color:var(--text-dim)">Max 10 MB · Any file type · Instant SHA-256 calculation</div>
                 </div>
 
                 <!-- Selected file info -->
-                <div class="file-selected-info" id="baseline-file-info">
-                    <div class="file-name-display" id="baseline-file-name">-</div>
-                    <div class="file-meta-display" id="baseline-file-meta">-</div>
+                <div class="file-selected-info" id="smart-file-info" style="margin-top:14px;">
+                    <div class="file-name-display" id="smart-file-name">-</div>
+                    <div class="file-meta-display" id="smart-file-meta">-</div>
                 </div>
 
-                <!-- Hash preview -->
-                <div class="hash-preview" id="baseline-hash-preview">
-                    <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;letter-spacing:1px;">CRYPTOGRAPHIC FINGERPRINT (SHA-256)</div>
-                    <div class="hash-row"><span class="hash-label">SHA-256</span><span class="hash-value" id="prev-sha256">—</span></div>
-                    <div class="hash-row" style="display:none"><span class="hash-label">SHA-3-256</span><span class="hash-value" id="prev-sha3">—</span></div>
-                    <div class="hash-row"><span class="hash-label">SIZE</span><span class="hash-value" id="prev-size">—</span></div>
+                <!-- Instant SHA-256 Preview -->
+                <div class="hash-preview" id="smart-hash-preview" style="margin-top:14px;">
+                    <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;letter-spacing:1px;">CRYPTOGRAPHIC FINGERPRINT (SHA-256)</div>
+                    <div class="hash-row"><span class="hash-label">SHA-256</span><span class="hash-value" id="smart-sha256">—</span></div>
+                    <div class="hash-row"><span class="hash-label">FILE SIZE</span><span class="hash-value" id="smart-size">—</span></div>
                 </div>
 
-                <!-- Result -->
-                <div class="result-box" id="baseline-result"></div>
+                <!-- Result Box -->
+                <div class="result-box" id="smart-result" style="margin-top:16px;"></div>
 
-                <!-- Progress -->
-                <div class="progress-bar-wrap" id="baseline-progress"><div class="progress-bar-fill" style="width:0%"></div></div>
-
-                <!-- Action buttons -->
-                <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;">
-                    <button class="btn btn-success btn-lg" id="btn-set-baseline" onclick="uploadBaseline()" disabled>
-                        🛡️ Establish Baseline & Vault
-                    </button>
-                    <button class="btn btn-outline" onclick="clearBaselineForm()">✕ Clear</button>
-                </div>
-            </div>
-
-            <!-- Step 3: Verify -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">🔍 Verify File Integrity</div>
-                        <div class="card-sub">Upload the same file again to compare against its stored baseline. Any tampering is detected instantly.</div>
+                <!-- Inline Diff for Tampering -->
+                <div id="smart-diff-section" style="display:none;margin-top:18px;">
+                    <div style="font-size:12px;font-weight:700;color:var(--crimson);margin-bottom:8px;letter-spacing:1px;">⚠️ TAMPER DIFF — BASELINE VS CURRENT FILE</div>
+                    <div class="diff-box" id="smart-diff-box"></div>
+                    <div id="smart-heuristics-box" style="margin-top:14px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;"></div>
+                    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" id="btn-smart-view-report" onclick="" style="display:none;">📑 View Full Forensic Report</button>
+                        <button class="btn btn-outline" id="btn-smart-download-report" onclick="" style="display:none;">📥 Download Report HTML</button>
                     </div>
                 </div>
 
-                <div class="upload-zone" id="upload-zone-verify" onclick="document.getElementById('verify-file-input').click()" ondragover="onDragOver(event,'verify')" ondragleave="onDragLeave('verify')" ondrop="onDrop(event,'verify')">
-                    <input type="file" id="verify-file-input" onchange="onFileSelected('verify')">
-                    <div class="upload-icon">🔍</div>
-                    <div class="upload-title">Upload File to Verify</div>
-                    <div class="upload-sub">Upload the same filename that was previously baselined</div>
+                <!-- Progress Bar -->
+                <div class="progress-bar-wrap" id="smart-progress" style="margin-top:14px;"><div class="progress-bar-fill" style="width:0%"></div></div>
+
+                <!-- Action Toolbar -->
+                <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-primary btn-lg" id="btn-smart-scan-now" onclick="triggerSmartScan()" disabled>
+                        ⚡ Scan &amp; Verify Integrity
+                    </button>
+                    <button class="btn btn-outline" id="btn-force-baseline" onclick="forceBaselineUpload()" disabled title="Update stored baseline with this file version">
+                        🛡️ Force Re-Baseline
+                    </button>
+                    <button class="btn btn-outline" onclick="clearSmartForm()">✕ Clear</button>
                 </div>
 
-                
                 <!-- Quick-Select Registered Asset to Verify -->
-                <div style="margin-top:14px;display:flex;align-items:center;gap:10px;background:rgba(0,240,255,0.03);border:1px dashed rgba(0,240,255,0.2);border-radius:8px;padding:12px 16px;flex-wrap:wrap;">
+                <div style="margin-top:20px;display:flex;align-items:center;gap:12px;background:rgba(0,240,255,0.03);border:1px dashed rgba(0,240,255,0.2);border-radius:8px;padding:12px 16px;flex-wrap:wrap;">
                     <span style="font-size:12px;font-weight:700;color:var(--cyan);letter-spacing:0.5px;">QUICK-VERIFY:</span>
                     <select id="quick-verify-select" onchange="onQuickVerifySelect(this.value)" style="background:var(--bg-card);color:var(--text-main);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:13px;flex:1;min-width:240px;cursor:pointer;">
-                        <option value="">-- Or choose an existing monitored file to verify --</option>
+                        <option value="">-- Choose an existing monitored file to verify --</option>
                     </select>
-                </div>
-
-                <div class="file-selected-info" id="verify-file-info">
-                    <div class="file-name-display" id="verify-file-name">-</div>
-                    <div class="file-meta-display" id="verify-file-meta">-</div>
-                </div>
-
-                <div class="result-box" id="verify-result"></div>
-
-                <!-- Inline diff after verify -->
-                <div id="verify-diff-section" style="display:none;margin-top:18px;">
-                    <div style="font-size:12px;font-weight:700;color:var(--crimson);margin-bottom:8px;letter-spacing:1px;">⚠ TAMPER DIFF — BASELINE VS UPLOADED</div>
-                    <div class="diff-box" id="verify-diff-box"></div>
-                    <div id="verify-heuristics-box" style="margin-top:14px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;"></div>
-                    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-                        <button class="btn btn-primary" id="btn-view-report-inline" onclick="" style="display:none;margin-right:8px;">📑 View Full Forensic Report</button>
-                        <button class="btn btn-outline" id="btn-download-report-inline" onclick="" style="display:none;">📥 Download Report HTML</button>
-                    </div>
-                </div>
-
-                <div class="progress-bar-wrap" id="verify-progress"><div class="progress-bar-fill" style="width:0%"></div></div>
-
-                <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;">
-                    <button class="btn btn-primary btn-lg" id="btn-verify-now" onclick="uploadVerify()" disabled>
-                        🔍 Verify Integrity Now
-                    </button>
-                    <button class="btn btn-outline" onclick="clearVerifyForm()">✕ Clear</button>
                 </div>
             </div>
         </div>
@@ -1723,8 +1650,8 @@
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:18px;margin-bottom:20px;">
                     <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:18px;">
                         <div style="font-size:11px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Hashing Engine</div>
-                        <div style="font-size:16px;font-weight:800;color:#fff;">Dual-Primitive Cryptography</div>
-                        <div style="font-size:13px;color:var(--text-muted);margin-top:6px;">Simultaneous <strong>SHA-256</strong> (FIPS 180-4) and <strong>SHA-3-256</strong> (FIPS 202) verification prevents algorithmic collision attacks.</div>
+                        <div style="font-size:16px;font-weight:800;color:#fff;">SHA-256 Cryptography</div>
+                        <div style="font-size:13px;color:var(--text-muted);margin-top:6px;">Simultaneous <strong>SHA-256</strong> (FIPS 180-4) integrity verification prevents algorithmic collision attacks.</div>
                     </div>
 
                     <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:18px;">
@@ -1762,7 +1689,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>System Architecture &amp; Hybrid Agent Topology</div>
-                        <div class="card-sub">Dual-mode architecture bridging zero-install browser verification with real-time OS kernel monitoring</div>
+                        <div class="card-sub">Enterprise architecture bridging zero-install browser verification with real-time OS kernel monitoring</div>
                     </div>
                     <span class="badge badge-clean" id="arch-tab-db-badge">HYBRID ACTIVE</span>
                 </div>
@@ -1777,7 +1704,7 @@
                             </div>
                         </div>
                         <ul style="padding-left:20px;font-size:13px;line-height:2;color:var(--text-main);" id="arch-cloud-capabilities">
-                            <li>Upload-based baseline establishment (SHA-256 + SHA-3-256)</li>
+                            <li>Upload-based baseline establishment (SHA-256)</li>
                             <li>Upload-based tamper verification &amp; granular line diffing</li>
                             <li>Deterministic heuristic threat triage (Privilege, Auth, Exfiltration)</li>
                             <li>Privacy-preserving AI Security Advisory (Google Gemini)</li>
@@ -1811,8 +1738,8 @@
                             <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">File uploaded or kernel event received</div>
                         </div>
                         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;">
-                            <div style="font-size:11px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:4px;">STAGE 02</div><div style="font-size:13px;font-weight:700;color:#fff;">Dual Hashing</div>
-                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Single-pass SHA-256 + SHA-3-256 computation</div>
+                            <div style="font-size:11px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:4px;">STAGE 02</div><div style="font-size:13px;font-weight:700;color:#fff;">SHA-256 Hashing</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Instant cryptographic SHA-256 computation</div>
                         </div>
                         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;">
                             <div style="font-size:11px;font-weight:800;color:var(--amber);letter-spacing:1px;margin-bottom:4px;">STAGE 03</div><div style="font-size:13px;font-weight:700;color:#fff;">Delta Inspection</div>
@@ -1920,7 +1847,7 @@
         }
 
         const titles = {
-            dashboard: ['SECURITY OPERATIONS DASHBOARD', 'Dual-Primitive Cryptographic Baseline & Real-Time Tamper Triage'],
+            dashboard: ['SECURITY OPERATIONS DASHBOARD', 'SHA-256 Cryptographic Baseline & Real-Time Tamper Triage'],
             protect:   ['ASSET SCANNER & PROTECTION', 'Upload a file to establish a cryptographic baseline or verify integrity'],
             assets:    ['MONITORED ASSETS', 'All files registered in the cryptographic baseline vault'],
             diff:      ['CHANGE ANALYSIS', 'Forensic diff inspection with heuristic risk scoring'],
@@ -2125,48 +2052,208 @@
     // ═══════════════════════════════════════════════════════
     //  SMART 1-CLICK UNIFIED SCANNER
     // ═══════════════════════════════════════════════════════
+    
+    // ═══════════════════════════════════════════════════════
+    //  SINGLE UNIFIED SHA-256 SCANNER
+    // ═══════════════════════════════════════════════════════
+    let activeScannerFile = null;
+
     async function onSmartFileSelected() {
         const input = document.getElementById('smart-file-input');
         const file = input.files[0];
         if (!file) return;
+        setSmartFile(file);
+        // Automatically execute scan on selection
+        await triggerSmartScan();
+    }
 
+    async function setSmartFile(file) {
+        activeScannerFile = file;
+        const info = document.getElementById('smart-file-info');
+        if (info) info.classList.add('visible');
+        const nameEl = document.getElementById('smart-file-name');
+        if (nameEl) nameEl.textContent = '📄 ' + file.name;
+        const metaEl = document.getElementById('smart-file-meta');
+        if (metaEl) metaEl.textContent = `${formatBytes(file.size)} · Modified: ${new Date(file.lastModified).toLocaleString()}`;
+
+        const scanBtn = document.getElementById('btn-smart-scan-now');
+        if (scanBtn) scanBtn.disabled = false;
+        const baseBtn = document.getElementById('btn-force-baseline');
+        if (baseBtn) baseBtn.disabled = false;
+
+        // Instant WebCrypto SHA-256 Preview
+        const preview = document.getElementById('smart-hash-preview');
+        if (preview) preview.classList.add('visible');
+        const shaEl = document.getElementById('smart-sha256');
+        if (shaEl) shaEl.textContent = '⏳ computing SHA-256...';
+        const sizeEl = document.getElementById('smart-size');
+        if (sizeEl) sizeEl.textContent = formatBytes(file.size);
+
+        try {
+            const buffer = await file.arrayBuffer();
+            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            if (shaEl) shaEl.textContent = hex;
+        } catch(e) {
+            if (shaEl) shaEl.textContent = 'SHA-256 computed on server';
+        }
+    }
+
+    async function triggerSmartScan() {
+        if (!activeScannerFile) return;
+
+        const scanBtn = document.getElementById('btn-smart-scan-now');
+        if (scanBtn) {
+            scanBtn.disabled = true;
+            scanBtn.innerHTML = '<span class="spinner"></span> Scanning...';
+        }
         showProgress('smart-progress', true);
-        const resBox = document.getElementById('smart-result');
-        resBox.classList.remove('visible');
+
+        const diffSec = document.getElementById('smart-diff-section');
+        if (diffSec) diffSec.style.display = 'none';
 
         try {
             const form = new FormData();
-            form.append('file', file);
+            form.append('file', activeScannerFile);
             const res = await fetch('/api/smart_scan', { method: 'POST', body: form });
             const d = await res.json();
 
             if (d.error) {
                 showResultBox('smart-result', 'error', '❌ Scan Error', d.error);
             } else if (d.action === 'BASELINED') {
-                showResultBox('smart-result', 'success', '🛡️ ASSET BASELINED (1-CLICK)',
-                    `<strong>${d.file_name}</strong> was registered for the first time.<br>
-                    Cryptographic baseline stored in vault.<br>
-                    <span class="mono" style="font-size:11px;color:var(--cyan)">SHA-256: ${d.sha256}</span>`);
+                showResultBox('smart-result', 'success', '🛡️ ASSET REGISTERED & BASELINED',
+                    `<strong>${d.file_name}</strong> was registered in the cryptographic vault.<br>
+                    <span class="mono" style="font-size:12px;color:var(--cyan)">SHA-256: ${d.sha256}</span>`);
                 fetchStats();
                 loadFiles();
+                populateQuickVerifyDropdown();
             } else if (d.status === 'CLEAN' || d.status === 'UNCHANGED') {
                 showResultBox('smart-result', 'success', '✅ INTEGRITY VERIFIED (CLEAN)',
                     `<strong>${d.file_name}</strong> — SHA-256 hash matches baseline perfectly. No tampering detected.<br>
-                    <span class="mono" style="font-size:11px;color:var(--emerald)">SHA-256: ${d.sha256}</span>`);
+                    <span class="mono" style="font-size:12px;color:var(--emerald)">SHA-256: ${d.sha256}</span>`);
                 fetchStats();
             } else if (d.status === 'MODIFIED') {
                 showResultBox('smart-result', 'warning', '🚨 TAMPERING DETECTED!',
-                    `<strong>${d.file_name}</strong> — ${d.diff_summary || 'Cryptographic hash mismatch'}<br>
-                    Risk Level: <strong style="color:var(--crimson)">${d.risk_level} (${d.risk_score}/100)</strong><br>
+                    `<strong>${d.file_name}</strong> — ${d.diff_summary || 'Cryptographic SHA-256 mismatch'}<br>
+                    Risk: <strong style="color:var(--crimson)">${d.risk_level} (${d.risk_score}/100)</strong><br>
                     <span style="font-size:12px;color:var(--emerald)">📲 Real-time notification dispatched to Telegram / Discord!</span>`);
+
+                // Show inline diff
+                if (diffSec) {
+                    diffSec.style.display = 'block';
+                    const diffBox = document.getElementById('smart-diff-box');
+                    if (diffBox && d.raw_diff) {
+                        diffBox.innerHTML = d.raw_diff.split('\n').map(l => {
+                            const safe = l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                            if (l.startsWith('+')) return `<span class="diff-add">${safe}</span>`;
+                            if (l.startsWith('-')) return `<span class="diff-del">${safe}</span>`;
+                            return `<span class="diff-ctx">${safe}</span>`;
+                        }).join('');
+                    }
+
+                    const hBox = document.getElementById('smart-heuristics-box');
+                    if (hBox) {
+                        let hHtml = `<div><strong>Risk Level:</strong> <span class="badge badge-${(d.risk_level||'low').toLowerCase()}">${d.risk_level} — ${d.risk_score}/100</span></div>`;
+                        if (d.triggered_rules && d.triggered_rules.length > 0) {
+                            hHtml += '<div style="margin-top:8px"><strong>Triggered Security Rules:</strong></div>';
+                            hHtml += d.triggered_rules.map(r => `
+                                <div style="margin-top:6px;border-left:3px solid var(--crimson);padding-left:10px">
+                                    <span style="color:var(--crimson);font-weight:700">${r.rule_name}</span> <span class="badge badge-${(r.category||'high').toLowerCase()}">${r.category}</span>
+                                    <div style="color:var(--text-muted);font-size:12px;margin-top:2px">${r.description}</div>
+                                </div>`).join('');
+                        }
+                        hBox.innerHTML = hHtml;
+                    }
+
+                    if (d.event_id) {
+                        const rBtn = document.getElementById('btn-smart-view-report');
+                        if (rBtn) {
+                            rBtn.style.display = 'inline-flex';
+                            rBtn.onclick = () => viewReport(d.event_id);
+                        }
+                        const dBtn = document.getElementById('btn-smart-download-report');
+                        if (dBtn) {
+                            dBtn.style.display = 'inline-flex';
+                            dBtn.onclick = () => downloadReport(d.event_id);
+                        }
+                    }
+                }
+
                 fetchStats();
                 loadEvents();
             }
         } catch(e) {
             showResultBox('smart-result', 'error', 'Network Error', e.message);
         } finally {
+            if (scanBtn) {
+                scanBtn.disabled = false;
+                scanBtn.innerHTML = '⚡ Scan &amp; Verify Integrity';
+            }
             showProgress('smart-progress', false);
         }
+    }
+
+    async function forceBaselineUpload() {
+        if (!activeScannerFile) return;
+        const baseBtn = document.getElementById('btn-force-baseline');
+        if (baseBtn) {
+            baseBtn.disabled = true;
+            baseBtn.innerHTML = '<span class="spinner"></span> Updating Baseline...';
+        }
+        showProgress('smart-progress', true);
+
+        try {
+            const form = new FormData();
+            form.append('file', activeScannerFile);
+            const res = await fetch('/api/upload_baseline', { method: 'POST', body: form });
+            const d = await res.json();
+            if (d.error) {
+                showResultBox('smart-result', 'error', 'Error', d.error);
+            } else {
+                showResultBox('smart-result', 'success', '🛡️ BASELINE UPDATED',
+                    `<strong>${d.file_name}</strong> baseline was updated successfully.<br>
+                    <span class="mono" style="font-size:12px;color:var(--cyan)">New SHA-256: ${d.sha256}</span>`);
+                fetchStats();
+                loadFiles();
+                populateQuickVerifyDropdown();
+            }
+        } catch(e) {
+            showResultBox('smart-result', 'error', 'Network Error', e.message);
+        } finally {
+            if (baseBtn) {
+                baseBtn.disabled = false;
+                baseBtn.innerHTML = '🛡️ Force Re-Baseline';
+            }
+            showProgress('smart-progress', false);
+        }
+    }
+
+    function clearSmartForm() {
+        activeScannerFile = null;
+        const input = document.getElementById('smart-file-input');
+        if (input) input.value = '';
+        const info = document.getElementById('smart-file-info');
+        if (info) info.classList.remove('visible');
+        const preview = document.getElementById('smart-hash-preview');
+        if (preview) preview.classList.remove('visible');
+        const resBox = document.getElementById('smart-result');
+        if (resBox) resBox.classList.remove('visible');
+        const diffSec = document.getElementById('smart-diff-section');
+        if (diffSec) diffSec.style.display = 'none';
+        const scanBtn = document.getElementById('btn-smart-scan-now');
+        if (scanBtn) scanBtn.disabled = true;
+        const baseBtn = document.getElementById('btn-force-baseline');
+        if (baseBtn) baseBtn.disabled = true;
+    }
+
+    function onQuickVerifySelect(fileName) {
+        if (!fileName) return;
+        const mockFile = new File(["baseline verification check"], fileName, { type: "text/plain" });
+        setSmartFile(mockFile);
+        document.getElementById('smart-file-name').textContent = '📄 ' + fileName;
+        document.getElementById('smart-file-meta').textContent = 'Selected from registered monitored assets vault';
+        showToast('Asset Selected', `Loaded '${fileName}'. Click 'Scan & Verify Integrity' to test.`, 'info');
     }
 
     // ═══════════════════════════════════════════════════════
@@ -2364,7 +2451,7 @@
         const preview = document.getElementById('baseline-hash-preview');
         preview.classList.add('visible');
         document.getElementById('prev-sha256').textContent = '⏳ computing...';
-        document.getElementById('prev-sha3').textContent = '(SHA-3 computed server-side on upload)';
+        
         document.getElementById('prev-size').textContent = formatBytes(file.size);
 
         // Use WebCrypto for instant SHA-256 preview
@@ -2406,7 +2493,7 @@
                 showResultBox('baseline-result', 'error', '❌ Error', d.error);
             } else {
                 document.getElementById('prev-sha256').textContent = d.sha256;
-                document.getElementById('prev-sha3').textContent = d.sha3_256;
+                
 
                 const msg = d.re_baselined
                     ? `✅ Baseline UPDATED for <strong>${d.file_name}</strong> (${formatBytes(d.file_size)})`
@@ -2448,7 +2535,7 @@
                 showResultBox('verify-result', 'error', '❌ Error', d.error);
             } else if (d.status === 'CLEAN' || d.status === 'UNCHANGED') {
                 showResultBox('verify-result', 'success', '✅ INTEGRITY VERIFIED',
-                    `<strong>${d.file_name}</strong> — Dual hashes match baseline exactly. No tampering detected.<br>
+                    `<strong>${d.file_name}</strong> — SHA-256 hash matches baseline exactly. No tampering detected.<br>
                     <span class="mono" style="font-size:11px;color:var(--emerald)">SHA-256: ${d.sha256.substring(0,32)}…</span>`);
                 document.getElementById('verify-diff-section').style.display = 'none';
                 setWorkflowStep(4);
